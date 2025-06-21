@@ -1,26 +1,643 @@
-@import "tailwindcss";
+/* src/app/globals.css */
 
+/* --- "ZEN" COLOR PALETTE --- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fbf1c7;
+  --surface-1: #f9f5e9;
+  --surface-2: #f2e5bc;
+  --text-main: #3c3836;
+  --text-subtle: #7c6f64;
+  --border-color: #d5c4a1;
+  --focus-ring: rgba(69, 133, 136, 0.4);
+  --primary-accent: #458588; /* Calm Teal/Blue for selected */
+  --destructive-accent: #9d0006; /* Earthy Red for weekends/delete */
+  --shadow: rgba(92, 84, 78, 0.1);
+  --left-pane-width: 400px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* --- GLOBAL STYLES --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  background-color: var(--background);
+  color: var(--text-main);
+  text-transform: lowercase;
+  font-family: 'ui-monospace', 'cascadia mono', 'source code pro', 'menlo', 'consolas', 'dejavu sans mono', monospace;
+  min-height: 100vh;
+  overflow: hidden;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* --- TWO-COLUMN LAYOUT --- */
+.two-column-layout {
+  display: grid;
+  grid-template-columns: var(--left-pane-width) 1fr;
+  height: 100vh;
+}
+.left-pane, .right-pane {
+  height: 100vh;
+  overflow-y: auto;
+  padding: 2.5rem 1.5rem;
+  padding-bottom: 120px;
+}
+.left-pane {
+  background-color: var(--surface-1);
+  border-right: 1px solid var(--border-color);
+}
+.right-pane {
+  padding: 2.5rem 3rem;
+}
+.pane-header {
+  padding: 0 0.5rem;
+  margin-bottom: 2rem;
+}
+.pane-header h1 {
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--text-subtle);
+}
+
+/* --- RESPONSIVENESS --- */
+@media (max-width: 800px) {
+  .two-column-layout { grid-template-columns: 1fr; }
+  .left-pane { border-right: none; border-bottom: 1px solid var(--border-color); height: auto; }
+  .right-pane { padding: 2rem 1.5rem; }
+}
+
+/* --- LEFT PANE (Note List) --- */
+.search-bar { padding: 0 0.5rem; margin-bottom: 2rem; }
+.search-input {
+  width: 100%; font-size: 1rem; padding: 0.85rem 1rem;
+  background-color: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.note-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.note-list-item {
+  padding: 1.25rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease;
+}
+.note-list-item:hover { background-color: var(--surface-2); }
+.note-list-item.selected { background-color: #fff; border-color: var(--border-color); }
+.note-list-item h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.note-list-item.selected h3 { color: var(--primary-accent); }
+.note-list-item p { font-size: 0.9rem; color: var(--text-subtle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* --- RIGHT PANE (Note Detail) --- */
+.empty-state-view { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: var(--text-subtle); text-align: center; }
+.empty-state-view p { font-size: 1.1rem; line-height: 1.6; max-width: 30ch; }
+.note-detail-header { padding-bottom: 1.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); }
+.note-detail-header h2 { font-size: 2.5rem; font-weight: 600; line-height: 1.2; }
+.note-detail-actions { display: inline-flex; gap: 0.5rem; background-color: var(--surface-1); border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 8px; float: right; margin-left: 1rem; }
+.note-detail-actions button { background: none; border: none; cursor: pointer; font-family: inherit; font-size: 0.9rem; color: var(--text-subtle); padding: 0.25rem 0.75rem; border-radius: 6px; transition: all 0.2s ease; }
+.note-detail-actions button:hover { background-color: var(--surface-2); color: var(--text-main); }
+.note-detail-actions button:last-child:hover { background-color: var(--destructive-accent); color: white; }
+.note-detail-meta { font-size: 0.9rem; color: var(--text-subtle); margin-bottom: 2.5rem; display: block; clear: both; }
+.note-detail-content { font-size: 1.1rem; line-height: 1.9; color: var(--text-main); }
+.note-detail-content p { margin-bottom: 1.25em; }
+
+/* --- NOTE CARD (Calendar View) --- */
+.note-card-grid { display: grid; gap: 2rem; }
+.note-card-display { background: transparent; }
+.note-card-header { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.5rem; }
+.note-card-header h3 { font-size: 1.5rem; font-weight: 600; }
+.note-card-actions { transform: translateY(-2px); }
+.note-card-actions button { background-color: var(--surface-1); border: 1px solid var(--border-color); padding: 1px 6px; border-radius: 4px; font-size: 0.8rem; color: var(--text-subtle); cursor: pointer; margin-right: 0.25rem; }
+.note-card-actions button:hover { background-color: var(--surface-2); color: var(--text-main); }
+.note-card-content p { line-height: 1.6; color: var(--text-main); }
+.note-card-footer { margin-top: 0.75rem; font-size: 0.9rem; color: var(--text-subtle); }
+
+/* --- TASKBAR --- */
+.taskbar {
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); display: flex;
+  background-color: var(--surface-2); padding: 0.5rem; border-radius: 12px;
+  box-shadow: 0 8px 25px var(--shadow); border: 1px solid var(--border-color); z-index: 50;
+  gap: 0.5rem; align-items: center;
+}
+.taskbar-logo {
+  width: 36px; height: 36px; border-radius: 50%; background-color: var(--text-main);
+  color: var(--background); display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 1.1rem; margin-right: 0.5rem;
+}
+.taskbar-navigation { display: flex; }
+.taskbar-actions { margin-left: auto; }
+.taskbar-button {
+  background: none; border: none; color: var(--text-subtle); font-family: inherit;
+  font-size: 0.9rem; cursor: pointer; padding: 0.6rem 1.2rem; border-radius: 8px;
+  transition: all 0.2s ease-in-out; text-decoration: none; font-weight: 500;
+}
+.taskbar-button:hover { color: var(--text-main); }
+.taskbar-button.active { color: var(--text-main); background-color: #fff; }
+.taskbar-button.primary-action { background-color: var(--primary-accent); color: white; }
+.taskbar-button.primary-action:hover { background-color: #356a6d; }
+
+/* --- CALENDAR --- */
+.react-calendar { width: 100% !important; border: none !important; background: none !important; font-family: inherit !important; }
+.react-calendar__navigation__label { font-weight: 400 !important; font-size: 1.25rem; color: var(--text-main) }
+.react-calendar__navigation button { color: var(--text-main) !important; font-weight: 600; }
+.react-calendar__month-view__weekdays__weekday abbr { text-decoration: none !important; font-weight: 600; color: var(--text-subtle); }
+.react-calendar__tile { border-radius: 4px !important; color: var(--text-main) !important; }
+.react-calendar__tile:disabled { color: var(--border-color) !important; }
+.react-calendar__tile--now { background: none !important; font-weight: 900 !important; }
+.react-calendar__tile--active { background: var(--primary-accent) !important; color: white !important; }
+.weekend-day { color: var(--destructive-accent) !important; }
+.day-with-notes { font-weight: 900; }
+
+/* --- NEW CALENDAR LAYOUT --- */
+.calendar-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  padding-bottom: 120px;
+  overflow-y: auto;
+}
+
+/* Calendar in left pane */
+.left-pane .calendar-grid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface-1);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.left-pane .calendar-navigation {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.left-pane .calendar-navigation button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-subtle);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.left-pane .calendar-navigation button:hover {
+  background-color: var(--surface-2);
+  color: var(--text-main);
+}
+
+.left-pane .calendar-navigation h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.left-pane .today-button {
+  background-color: var(--primary-accent);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.left-pane .today-button:hover {
+  background-color: #356a6d;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: var(--surface-2);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.calendar-weekday {
+  padding: 0.75rem;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-subtle);
+  font-size: 0.8rem;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  flex: 1;
+}
+
+.calendar-day {
+  min-height: 80px;
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.calendar-day:hover {
+  background-color: var(--surface-2);
+}
+
+.calendar-day.other-month {
+  background-color: var(--background);
+  color: var(--text-subtle);
+}
+
+.calendar-day.today {
+  background-color: rgba(69, 133, 136, 0.1);
+  font-weight: 600;
+}
+
+.calendar-day.selected-date {
+  background-color: var(--primary-accent);
+  color: white;
+}
+
+.calendar-day.selected-date .calendar-day-number {
+  color: white;
+}
+
+.calendar-day.today .calendar-day-number {
+  background-color: var(--primary-accent);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+}
+
+.calendar-day-number {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.calendar-day-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.calendar-note-preview {
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 0.15rem 0.3rem;
+  font-size: 0.6rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-note-preview:hover {
+  background-color: var(--surface-2);
+  border-color: var(--primary-accent);
+}
+
+.note-preview-title {
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendar-note-more {
+  font-size: 0.6rem;
+  color: var(--text-subtle);
+  text-align: center;
+  padding: 0.15rem;
+}
+
+/* Right pane - Notes for selected date */
+.notes-for-date {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.note-card {
+  background-color: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.note-card:hover {
+  background-color: var(--surface-2);
+  border-color: var(--primary-accent);
+}
+
+.note-card.selected {
+  background-color: white;
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.note-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.note-card-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.note-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.note-card-actions button {
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.note-card-actions button:hover {
+  background-color: var(--surface-2);
+  color: var(--text-main);
+}
+
+.note-card-actions button:last-child:hover {
+  background-color: var(--destructive-accent);
+  color: white;
+}
+
+.note-card-content {
+  margin-bottom: 1rem;
+}
+
+.note-card-content p {
+  line-height: 1.6;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.note-preview-more {
+  color: var(--text-subtle);
+  font-style: italic;
+}
+
+.note-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+}
+
+.note-card-tags {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.note-card-tags .tag-pill {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+}
+
+.note-card-time {
+  font-size: 0.75rem;
+}
+
+/* Selected note detail */
+.selected-note-detail {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.selected-note-detail .note-detail-header {
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.selected-note-detail .note-detail-header h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.selected-note-detail .note-detail-content {
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* Responsive adjustments for calendar */
+@media (max-width: 1200px) {
+  .calendar-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .calendar-controls .search-bar {
+    max-width: none;
+  }
+  
+  .calendar-note-detail {
+    position: static;
+    width: 100%;
+    margin-top: 2rem;
+    max-height: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (max-width: 768px) {
+  .calendar-layout {
+    padding: 1rem;
+  }
+  
+  .calendar-day {
+    min-height: 60px;
+    padding: 0.15rem;
+  }
+  
+  .calendar-day-number {
+    font-size: 0.7rem;
+  }
+  
+  .calendar-note-preview {
+    padding: 0.1rem 0.2rem;
+    font-size: 0.5rem;
+  }
+}
+
+/* --- MODAL DIALOG --- */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(60, 56, 54, 0.7);
+  display: flex; justify-content: center; align-items: flex-start;
+  padding-top: 15vh; z-index: 100;
+}
+.modal-content {
+  background-color: var(--background); padding: 2.5rem; border-radius: 12px;
+  width: 90%; max-width: 600px; border: 1px solid var(--border-color);
+  box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+}
+.modal-content h2 { font-size: 1.75rem; margin-bottom: 2rem; font-weight: 600; }
+.note-form { display: flex; flex-direction: column; gap: 1.5rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+.form-group label { font-size: 0.9rem; color: var(--text-subtle); font-weight: 500; }
+.form-group input, .form-group textarea {
+  font-family: inherit; font-size: 1rem; padding: 0.85rem;
+  background-color: var(--surface-1); border: 1px solid var(--border-color);
+  border-radius: 8px; color: var(--text-main); text-transform: lowercase;
+  transition: all 0.2s ease-in-out;
+}
+.form-group input:focus, .form-group textarea:focus {
+  outline: none; background-color: #fff; border-color: var(--primary-accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.form-group textarea { min-height: 150px; line-height: 1.6; }
+.form-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem; }
+.form-button {
+  font-family: inherit; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 8px;
+  cursor: pointer; text-transform: lowercase; border: 1px solid transparent;
+  font-weight: 600; transition: all 0.2s ease;
+}
+.form-button.primary { background-color: var(--primary-accent); color: white; }
+.form-button.primary:hover { background-color: #356a6d; }
+.form-button.secondary { background-color: var(--surface-2); color: var(--text-main); border-color: var(--border-color); }
+.form-button.secondary:hover { background-color: var(--border-color); }
+
+
+/* --- NEW: TAGS & FILTERING --- */
+.tag-filter-container {
+  padding: 0 0.5rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.tag-filter-all {
+  background: none; border: 1px solid var(--border-color);
+  padding: 0.25rem 0.75rem; border-radius: 999px;
+  font-family: inherit; font-size: 0.9rem; cursor: pointer;
+  color: var(--text-subtle);
+}
+.tag-filter-all.active {
+  background-color: var(--text-main);
+  color: var(--background);
+  border-color: var(--text-main);
+}
+.tag-pill {
+  border-width: 1px;
+  border-style: solid;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tag-pill:hover {
+  transform: translateY(-1px);
+}
+.note-detail-tags {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.note-detail-tags .tag-pill { /* Remove click interaction for display-only tags */
+  pointer-events: none;
+  background-color: var(--tag-color, var(--primary-accent));
+  color: #fff;
+}
+
+
+/* --- NEW: TAG SELECTOR (in Modal) --- */
+.tag-selector { position: relative; }
+.tag-pills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-1);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+.tag-pill-option {
+  --tag-color: var(--primary-accent); /* Default color */
+  border: 1px solid var(--tag-color);
+  color: var(--tag-color);
+  background-color: transparent;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-family: inherit; font-size: 0.9rem; cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tag-pill-option.selected {
+  background-color: var(--tag-color);
+  color: #fff;
+}
+.new-tag-form {
+  display: flex;
+  gap: 0.5rem;
+}
+.new-tag-form input {
+  flex-grow: 1;
+  font-family: inherit; font-size: 1rem; padding: 0.5rem 0.75rem;
+  background-color: transparent; border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+.new-tag-form button {
+  font-family: inherit; font-size: 0.9rem; padding: 0 1rem;
+  border-radius: 6px; cursor: pointer; border: 1px solid var(--border-color);
+  background-color: var(--surface-2);
+}
+.color-picker-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  padding: 0;
+  flex-shrink: 0;
+}
+.color-picker-popover {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  margin-top: 0.5rem;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-subtle);
 }
