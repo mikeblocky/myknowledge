@@ -1,7 +1,7 @@
 // src/middleware.ts
 import { clerkMiddleware } from '@clerk/nextjs/server';
 
-export default clerkMiddleware();
+export default clerkMiddleware({ debug: true });
 
 export const config = {
   // Skip Next.js internals and all static files, unless found in search params
