@@ -6,6 +6,7 @@ import { PlusCircle, FileText, Search, Tag, Filter, ChevronsUpDown } from 'lucid
 import TagPill from '@/components/TagPill';
 import JournalTemplateSelector from '@/components/JournalTemplateSelector';
 import { motion, AnimatePresence } from 'framer-motion';
+import CustomSelect from '@/components/CustomSelect';
 
 type SortOption =
   | 'newest-first'
@@ -20,6 +21,13 @@ export default function JournalPage() {
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOption>('newest-first');
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+
+  const sortOptions = [
+    { value: 'newest-first', label: 'Newest first' },
+    { value: 'oldest-first', label: 'Oldest first' },
+    { value: 'title-a-z', label: 'Title A-Z' },
+    { value: 'title-z-a', label: 'Title Z-A' },
+  ];
 
   const journalNotes = useMemo(() => {
     const sorted = notes
@@ -103,19 +111,10 @@ export default function JournalPage() {
         </div>
         )}
         <div className="filters-container">
-            <select
+            <CustomSelect
+              options={sortOptions}
               value={sortOrder}
-              onChange={e => setSortOrder(e.target.value as SortOption)}
-              className="sort-select"
-            >
-              <option value="newest-first">Newest first</option>
-              <option value="oldest-first">Oldest first</option>
-              <option value="title-a-z">Title A-Z</option>
-              <option value="title-z-a">Title Z-A</option>
-            </select>
-            <ChevronsUpDown
-              className="sort-select-icon"
-              size={16}
+              onChange={(value) => setSortOrder(value as SortOption)}
             />
         </div>
         <ul className="note-list">

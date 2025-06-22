@@ -18,6 +18,18 @@
   padding-bottom: 110px;
 }
 
+[data-theme='light'] {
+    --background: #f5f5f5;
+    --surface-1: #ffffff;
+    --surface-2: #f0f0f0;
+    --surface-3: #e0e0e0;
+    --text-main: #212121;
+    --text-subtle: #757575;
+    --border-color: #e0e0e0;
+    --shadow: rgba(0, 0, 0, 0.1);
+    --focus-ring: rgba(233, 109, 36, 0.3);
+}
+
 /* --- TASKBAR STYLES --- */
 .taskbar {
   position: fixed;
@@ -323,6 +335,10 @@ ul {
   pointer-events: none;
 }
 
+.sort-select:focus + .sort-select-icon {
+  color: var(--primary);
+}
+
 /* --- Note List --- */
 .note-list {
   display: flex;
@@ -354,6 +370,7 @@ ul {
   margin-bottom: 0.25rem;
   display: -webkit-box;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -373,6 +390,7 @@ ul {
   color: var(--text-subtle);
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin-bottom: 0.75rem;
@@ -1234,13 +1252,12 @@ ul {
 /* Journal entry preview styling */
 .note-list-item-preview {
   font-size: 0.8rem;
-  color: var(--text-subtle);
-  margin-top: 0.5rem;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
 .note-list-item.selected .note-list-item-preview {
@@ -1404,4 +1421,78 @@ ul {
 .notes-count,
 .notes-for-day-list {
   display: none;
+}
+
+/* --- CUSTOM SELECT STYLES --- */
+.custom-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.875rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-select-trigger:hover {
+  border-color: var(--primary);
+}
+
+.custom-select-trigger:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.custom-select-icon {
+  color: var(--text-subtle);
+  transition: transform 0.2s ease;
+}
+
+.custom-select-trigger[aria-expanded='true'] .custom-select-icon {
+  transform: rotate(180deg);
+}
+
+.custom-select-options {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+  z-index: 20;
+  box-shadow: 0 8px 16px var(--shadow);
+  overflow: hidden;
+}
+
+.custom-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.custom-select-option.selected {
+  background-color: var(--surface-3);
+  font-weight: 500;
+}
+
+.custom-select-option:not(.selected):hover {
+    background-color: var(--surface-2);
 }

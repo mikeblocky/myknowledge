@@ -10,6 +10,7 @@ import { Plus, Search, Tag, Filter, SortAsc, FileText, ChevronDown, ArrowLeft, C
 import TagPill from '@/components/TagPill';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import CustomSelect from '@/components/CustomSelect';
 
 type SortOption =
   | 'newest-first'
@@ -28,6 +29,13 @@ export default function HomePage() {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [isListView, setIsListView] = useState(true);
+  
+  const sortOptions = [
+    { value: 'newest-first', label: 'Newest first' },
+    { value: 'oldest-first', label: 'Oldest first' },
+    { value: 'title-a-z', label: 'Title A-Z' },
+    { value: 'title-z-a', label: 'Title Z-A' },
+  ];
   
   const sortedNotes = useMemo(() => {
     return [...notes].sort((a, b) => {
@@ -109,19 +117,10 @@ export default function HomePage() {
             </div>
           )}
           <div className="filters-container">
-            <select
+            <CustomSelect
+              options={sortOptions}
               value={sortOrder}
-              onChange={e => setSortOrder(e.target.value as SortOption)}
-              className="sort-select"
-            >
-              <option value="newest-first">Newest first</option>
-              <option value="oldest-first">Oldest first</option>
-              <option value="title-a-z">Title A-Z</option>
-              <option value="title-z-a">Title Z-A</option>
-            </select>
-            <ChevronsUpDown
-              className="sort-select-icon"
-              size={16}
+              onChange={(value) => setSortOrder(value as SortOption)}
             />
           </div>
           <ul className="note-list">
