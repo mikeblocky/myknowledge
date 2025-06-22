@@ -1,105 +1,162 @@
 // src/app/page.tsx
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useNotes, Note, Tag } from '@/context/NotesContext';
+import { useState, useMemo, useEffect } from 'react';
+import { useNotes, Note } from '@/context/NotesContext';
 import NoteListItem from '@/components/NoteListItem';
-import Taskbar from '@/components/Taskbar';
+import NoteModal from '@/components/NoteModal';
+import NoteDisplay from '@/components/NoteDisplay';
+import { Plus, Search, Tag, Filter, SortAsc, FileText, ChevronDown, ArrowLeft, ChevronsUpDown, LayoutGrid, List, ArrowDownUp } from 'lucide-react';
 import TagPill from '@/components/TagPill';
-import TagSelector from '@/components/TagSelector';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+
+type SortOption =
+  | 'newest-first'
+  | 'oldest-first'
+  | 'title-a-z'
+  | 'title-z-a';
 
 export default function HomePage() {
-  // 'isLoading' has been removed from this destructuring, fixing the error.
-  const { notes, tags, addNote, updateNote, deleteNote } = useNotes();
-  
-  // State for UI management
+  const { notes, tags, addNote, updateNote, togglePinNote } = useNotes();
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
-  const [activeTagFilter, setActiveTagFilter] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // State for the modal form
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
-  const [noteTitle, setNoteTitle] = useState('');
-  const [noteContent, setNoteContent] = useState('');
-  const [noteTagIds, setNoteTagIds] = useState<number[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOption>('newest-first');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [isListView, setIsListView] = useState(true);
+  
+  const sortedNotes = useMemo(() => {
+    return [...notes].sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+
+      switch (sortOrder) {
+        case 'newest-first':
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        case 'oldest-first':
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        case 'title-a-z':
+          return a.title.localeCompare(b.title);
+        case 'title-z-a':
+          return b.title.localeCompare(a.title);
+        default:
+          return 0;
+      }
+    });
+  }, [notes, sortOrder]);
 
   const filteredNotes = useMemo(() => {
-    return notes.filter(note => {
-      const searchMatch = searchTerm === '' || 
-        note.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        note.content.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const tagMatch = activeTagFilter === null || note.tagIds.includes(activeTagFilter);
-      
-      return searchMatch && tagMatch;
-    });
-  }, [notes, searchTerm, activeTagFilter]);
-
-  const selectedNote = useMemo(() => {
-    if (selectedNoteId && !filteredNotes.some(note => note.id === selectedNoteId)) {
-        setSelectedNoteId(null);
-        return null;
+    let tempNotes = sortedNotes;
+    if (selectedTagId) {
+      tempNotes = tempNotes.filter(note => note.tagIds.includes(selectedTagId));
     }
-    return notes.find(note => note.id === selectedNoteId) || null;
-  }, [selectedNoteId, filteredNotes, notes]);
+    if (searchTerm) {
+      tempNotes = tempNotes.filter(note => {
+        const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          note.content.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesSearch;
+      });
+    }
+    return tempNotes;
+  }, [sortedNotes, selectedTagId, searchTerm]);
 
-  // --- HANDLER FUNCTIONS ---
-  const handleSelectNote = (id: number) => { setSelectedNoteId(id); };
-  const handleDeleteAndDeselect = (id: number) => { if (window.confirm('are you sure you want to delete this note?')) { deleteNote(id); setSelectedNoteId(null); }};
-  const handleOpenNewNoteModal = () => { setEditingNote(null); setNoteTitle(''); setNoteContent(''); setNoteTagIds([]); setIsModalOpen(true); };
-  const handleStartEdit = (note: Note) => { setEditingNote(note); setNoteTitle(note.title); setNoteContent(note.content); setNoteTagIds(note.tagIds); setIsModalOpen(true); };
-  const handleSaveNote = () => { if (!noteTitle.trim()) { alert('please enter a title.'); return; } if (editingNote) { updateNote(editingNote.id, noteTitle, noteContent, noteTagIds); } else { addNote(noteTitle, noteContent, noteTagIds); } closeModal(); };
-  const closeModal = () => { setIsModalOpen(false); setEditingNote(null); setNoteTitle(''); setNoteContent(''); setNoteTagIds([]); };
+  const selectedNote = useMemo(() => notes.find(note => note.id === selectedNoteId), [notes, selectedNoteId]);
+
+  useEffect(() => {
+    if (!selectedNote && filteredNotes.length > 0) {
+      setSelectedNoteId(filteredNotes[0].id);
+    }
+    if (selectedNote && !filteredNotes.some(n => n.id === selectedNote.id)) {
+        setSelectedNoteId(filteredNotes.length > 0 ? filteredNotes[0].id : null);
+    }
+  }, [filteredNotes, selectedNote]);
+
+  const handleAddClick = () => { setEditingNote(null); setIsModalOpen(true); };
+  const handleEditClick = (note: Note) => { setEditingNote(note); setIsModalOpen(true); };
+  const handleTagClick = (tagId: number) => { setSelectedTagId(prev => (prev === tagId ? null : tagId)); };
+  
+  const handleSaveNote = async (noteData: { title: string; content: string; tagIds: number[] }) => {
+    const savedNote = editingNote ? await updateNote({ ...editingNote, ...noteData }) : await addNote(noteData);
+    if (savedNote) setSelectedNoteId(savedNote.id);
+    setIsModalOpen(false);
+    setEditingNote(null);
+  };
+
+  const showDetailView = isMobile && selectedNoteId !== null;
 
   return (
     <>
-      <div className="two-column-layout">
+      <div className="main-layout">
         <div className="left-pane">
-          <header className="pane-header"><h1>all notes</h1></header>
-          <div className="search-bar"><input type="text" placeholder="search..." className="search-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /></div>
-          <div className="tag-filter-container">
-            <button className={`tag-filter-all ${activeTagFilter === null ? 'active' : ''}`} onClick={() => setActiveTagFilter(null)}>all notes</button>
-            {tags.map(tag => (<TagPill key={tag.id} tag={tag} isActive={activeTagFilter === tag.id} onClick={() => setActiveTagFilter(tag.id)} />))}
+          <div className="pane-header">
+            <h1><FileText size={20} /> All Notes</h1>
+            <button className="icon-button" onClick={handleAddClick} title="Create new note">
+              <Plus size={20} />
+            </button>
+          </div>
+          <div className="search-container">
+            <Search className="search-icon" size={16} />
+            <input type="text" placeholder="Search notes..." className="search-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          </div>
+          {tags.length > 0 && (
+            <div className="tags-container">
+              <div className="tags-header"><span><Tag size={14} /> Filter by tags</span><Filter size={14} /></div>
+              <div className="tags-list">{tags.map(tag => (<TagPill key={tag.id} tag={tag} isSelected={selectedTagId === tag.id} onClick={() => handleTagClick(tag.id)}/>))}</div>
+            </div>
+          )}
+          <div className="filters-container">
+            <select
+              value={sortOrder}
+              onChange={e => setSortOrder(e.target.value as SortOption)}
+              className="sort-select"
+            >
+              <option value="newest-first">Newest first</option>
+              <option value="oldest-first">Oldest first</option>
+              <option value="title-a-z">Title A-Z</option>
+              <option value="title-z-a">Title Z-A</option>
+            </select>
+            <ChevronsUpDown
+              className="sort-select-icon"
+              size={16}
+            />
           </div>
           <ul className="note-list">
-            {filteredNotes.map(note => (<NoteListItem key={note.id} note={note} isSelected={note.id === selectedNoteId} onClick={() => handleSelectNote(note.id)} />))}
+            <AnimatePresence>
+              {filteredNotes.map(note => (<NoteListItem key={note.id} note={note} isSelected={selectedNoteId === note.id} onSelect={() => setSelectedNoteId(note.id)} onPinToggle={() => togglePinNote(note.id)}/>))}
+            </AnimatePresence>
           </ul>
         </div>
         <div className="right-pane">
-          {selectedNote ? (
-            <div className="note-detail-view">
-              <header className="note-detail-header">
-                <h2>{selectedNote.title}</h2>
-                <div className="note-detail-actions"><button onClick={() => handleStartEdit(selectedNote)}>edit</button><button onClick={() => handleDeleteAndDeselect(selectedNote.id)}>delete</button></div>
-              </header>
-              <p className="note-detail-meta">last updated: {new Date(selectedNote.date).toLocaleDateString('en-us', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-              <div className="note-detail-tags">
-                {selectedNote.tagIds.map(tagId => { const tag = tags.find(t => t.id === tagId); return tag ? <TagPill key={tag.id} tag={tag} /> : null; })}
-              </div>
-              <div className="note-detail-content">
-                {selectedNote.content.split('\n').map((line, i) => <p key={i}>{line || '\u00a0'}</p>)}
-              </div>
-            </div>
-          ) : (
-            <div className="empty-state-view"><p>select a note from the left to view its content, or create a new one.</p></div>
-          )}
+          <AnimatePresence mode="wait">
+            {selectedNote ? (
+              <NoteDisplay 
+                key={selectedNote.id}
+                note={selectedNote}
+                onEdit={() => handleEditClick(selectedNote)}
+              />
+            ) : (
+              <div className="empty-state-view"><FileText size={48} className="empty-state-icon" /><p>Select a note to view it.</p></div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
-      <Taskbar actions={<button className="taskbar-button primary-action" onClick={handleOpenNewNoteModal}>+ new note</button>} />
-      {isModalOpen && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>{editingNote ? 'edit note' : 'new note'}</h2>
-            <form className="note-form" onSubmit={(e) => { e.preventDefault(); handleSaveNote(); }}>
-              <div className="form-group"><label htmlFor="title">title</label><input id="title" type="text" value={noteTitle} onChange={(e) => setNoteTitle(e.target.value)} /></div>
-              <div className="form-group"><label htmlFor="content">content</label><textarea id="content" value={noteContent} onChange={(e) => setNoteContent(e.target.value)} /></div>
-              <div className="form-group"><label>tags</label><TagSelector selectedTagIds={noteTagIds} onTagChange={setNoteTagIds} /></div>
-              <div className="form-actions"><button type="button" className="form-button secondary" onClick={closeModal}>cancel</button><button type="submit" className="form-button primary">save note</button></div>
-            </form>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {isModalOpen && (
+          <NoteModal 
+            note={editingNote} 
+            onSave={handleSaveNote} 
+            onClose={() => setIsModalOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
+
+// You'll need to create NoteModal.tsx as well.
+// For now, let's create a placeholder to avoid breaking the app.
+// I'll create the actual file in the next step.

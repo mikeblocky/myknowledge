@@ -1,25 +1,28 @@
 // src/components/TagPill.tsx
-import { Tag } from "@/context/NotesContext";
+'use client';
+
+import React from 'react';
+import { Tag } from '@/context/NotesContext';
+import { motion } from 'framer-motion';
 
 interface TagPillProps {
   tag: Tag;
-  onClick?: (tagId: number) => void;
-  isActive?: boolean;
+  isSelected?: boolean;
+  onClick?: () => void;
 }
 
-const TagPill = ({ tag, onClick, isActive }: TagPillProps) => {
+const TagPill: React.FC<TagPillProps> = ({ tag, isSelected, onClick }) => {
   return (
-    <button
-      className={`tag-pill ${isActive ? 'active' : ''}`}
-      style={{
-        backgroundColor: isActive ? tag.color : 'transparent',
-        borderColor: tag.color,
-        color: isActive ? '#fff' : tag.color,
-      }}
-      onClick={() => onClick?.(tag.id)}
+    <div
+      onClick={onClick}
+      className={`tag-pill ${isSelected ? 'selected' : ''}`}
     >
-      {tag.name}
-    </button>
+      <div
+        className="tag-pill-color-dot"
+        style={{ backgroundColor: tag.color }}
+      />
+      <span>{tag.name}</span>
+    </div>
   );
 };
 

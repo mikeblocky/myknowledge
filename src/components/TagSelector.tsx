@@ -1,8 +1,22 @@
 // src/components/TagSelector.tsx
 'use client';
 import { useState } from 'react';
-import { useNotes, Tag } from '@/context/NotesContext';
-import { SketchPicker } from 'react-color';
+import { useNotes } from '@/context/NotesContext';
+import TagPill from './TagPill'; // Import the TagPill component
+
+// A simple hash function to get a color from a string
+const stringToColor = (str: string) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xFF;
+    color += ('00' + value.toString(16)).substr(-2);
+  }
+  return color;
+}
 
 interface TagSelectorProps {
   selectedTagIds: number[];
@@ -12,9 +26,7 @@ interface TagSelectorProps {
 export default function TagSelector({ selectedTagIds, onTagChange }: TagSelectorProps) {
   const { tags, addTag } = useNotes();
   const [newTagName, setNewTagName] = useState('');
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [newTagColor, setNewTagColor] = useState('#458588');
-
+  
   const handleToggleTag = (tagId: number) => {
     const newSelection = selectedTagIds.includes(tagId)
       ? selectedTagIds.filter(id => id !== tagId)
@@ -23,49 +35,36 @@ export default function TagSelector({ selectedTagIds, onTagChange }: TagSelector
   };
 
   const handleCreateTag = () => {
-    if (!newTagName.trim()) return;
-    const newTag = addTag(newTagName, newTagColor);
+    const trimmedName = newTagName.trim();
+    if (!trimmedName) return;
+    
+    // Use our hash function to generate a color
+    const newTagColor = stringToColor(trimmedName);
+    const newTag = addTag(trimmedName, newTagColor);
+
     onTagChange([...selectedTagIds, newTag.id]);
     setNewTagName('');
-    setShowColorPicker(false);
   };
 
   return (
-    <div className="tag-selector">
-      <div className="tag-pills-container">
-        {tags.map(tag => (
-          <button
-            key={tag.id}
-            type="button"
-            className={`tag-pill-option ${selectedTagIds.includes(tag.id) ? 'selected' : ''}`}
-            style={{ '--tag-color': tag.color } as React.CSSProperties}
-            onClick={() => handleToggleTag(tag.id)}
-          >
-            {tag.name}
-          </button>
-        ))}
-      </div>
-      <div className="new-tag-form">
+    <div className="tag-selector-container">
+      {tags.map(tag => (
+        <TagPill
+          key={tag.id}
+          tag={tag}
+          isSelected
+          onClick={() => handleToggleTag(tag.id)}
+        />
+      ))}
+      <form onSubmit={handleCreateTag}>
         <input
           type="text"
-          placeholder="add or create tag..."
           value={newTagName}
           onChange={(e) => setNewTagName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleCreateTag())}
+          placeholder="+ Add Tag"
+          className="add-tag-input"
         />
-        <button
-          type="button"
-          className="color-picker-toggle"
-          style={{ backgroundColor: newTagColor }}
-          onClick={() => setShowColorPicker(!showColorPicker)}
-        />
-        <button type="button" onClick={handleCreateTag}>add</button>
-      </div>
-      {showColorPicker && (
-        <div className="color-picker-popover">
-          <SketchPicker color={newTagColor} onChange={(color) => setNewTagColor(color.hex)} />
-        </div>
-      )}
+      </form>
     </div>
   );
 }

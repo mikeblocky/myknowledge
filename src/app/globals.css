@@ -1,643 +1,1407 @@
-/* src/app/globals.css */
-
-/* --- "ZEN" COLOR PALETTE --- */
+/* --- ROOT & THEME VARIABLES --- */
 :root {
-  --background: #fbf1c7;
-  --surface-1: #f9f5e9;
-  --surface-2: #f2e5bc;
-  --text-main: #3c3836;
-  --text-subtle: #7c6f64;
-  --border-color: #d5c4a1;
-  --focus-ring: rgba(69, 133, 136, 0.4);
-  --primary-accent: #458588; /* Calm Teal/Blue for selected */
-  --destructive-accent: #9d0006; /* Earthy Red for weekends/delete */
-  --shadow: rgba(92, 84, 78, 0.1);
-  --left-pane-width: 400px;
+  --background: #0D0D0D;
+  --surface-1: #1C1C1C;
+  --surface-2: #282828;
+  --surface-3: #383838;
+  --text-main: #e0e0e0;
+  --text-subtle: #888888;
+  --border-color: #2c2c2c;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --primary: #e96d24;
+  --primary-hover: #f08a4b;
+  --destructive: #e5484d;
+  --destructive-hover: #f07075;
+  --focus-ring: rgba(233, 109, 36, 0.4);
+  --radius: 8px;
+  overflow: auto;
+  padding-bottom: 110px;
 }
 
-/* --- GLOBAL STYLES --- */
+/* --- TASKBAR STYLES --- */
+.taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface-1);
+  border-top: 1px solid var(--border-color);
+  padding: 0.5rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  z-index: 1000;
+  height: 70px;
+}
+
+.taskbar-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.taskbar-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  color: var(--text-subtle);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.taskbar-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--primary);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: 10px;
+}
+
+.taskbar-button:hover {
+  color: var(--text-main);
+  background: var(--surface-2);
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px var(--primary-hover), 0 0 5px white, 0 0 2px var(--primary);
+}
+
+.taskbar-button.active {
+  color: #fff;
+  background: var(--primary);
+  box-shadow: 0 4px 12px rgba(233, 109, 36, 0.3);
+  position: relative;
+}
+
+.taskbar-button.active::before {
+  opacity: 1;
+}
+
+.taskbar-button.active .active-indicator {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 3px;
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+.taskbar-button span {
+  position: relative;
+  z-index: 1;
+}
+
+.taskbar-button svg {
+  position: relative;
+  z-index: 1;
+}
+
+.taskbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  padding-left: 1rem;
+  border-left: 1px solid var(--border-color);
+}
+
+.taskbar-actions .taskbar-button {
+  padding: 0.5rem;
+  min-width: 36px;
+  justify-content: center;
+}
+
+/* --- CUSTOM SCROLLBAR --- */
+::-webkit-scrollbar {
+  width: 14px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--surface-2);
+  border-radius: 10px;
+  border: 3px solid var(--background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--surface-3);
+}
+
+/* --- BASE & TYPOGRAPHY --- */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
-body {
+
+html, body {
   background-color: var(--background);
   color: var(--text-main);
-  text-transform: lowercase;
-  font-family: 'ui-monospace', 'cascadia mono', 'source code pro', 'menlo', 'consolas', 'dejavu sans mono', monospace;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   min-height: 100vh;
+  width: 100vw;
   overflow: hidden;
 }
 
-/* --- TWO-COLUMN LAYOUT --- */
-.two-column-layout {
+.app-container {
   display: grid;
-  grid-template-columns: var(--left-pane-width) 1fr;
+  grid-template-rows: auto 1fr;
   height: 100vh;
 }
-.left-pane, .right-pane {
+
+.main-content {
+  overflow: auto;
   height: 100vh;
-  overflow-y: auto;
-  padding: 2.5rem 1.5rem;
-  padding-bottom: 120px;
-}
-.left-pane {
-  background-color: var(--surface-1);
-  border-right: 1px solid var(--border-color);
-}
-.right-pane {
-  padding: 2.5rem 3rem;
-}
-.pane-header {
-  padding: 0 0.5rem;
-  margin-bottom: 2rem;
-}
-.pane-header h1 {
-  font-size: 1.25rem;
-  font-weight: 400;
-  color: var(--text-subtle);
+  padding-bottom: 70px; /* Space for the docked taskbar */
 }
 
-/* --- RESPONSIVENESS --- */
-@media (max-width: 800px) {
-  .two-column-layout { grid-template-columns: 1fr; }
-  .left-pane { border-right: none; border-bottom: 1px solid var(--border-color); height: auto; }
-  .right-pane { padding: 2rem 1.5rem; }
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-/* --- LEFT PANE (Note List) --- */
-.search-bar { padding: 0 0.5rem; margin-bottom: 2rem; }
-.search-input {
-  width: 100%; font-size: 1rem; padding: 0.85rem 1rem;
-  background-color: var(--background);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  transition: all 0.2s ease-in-out;
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: 100%;
+  color: inherit;
+  background-color: transparent;
+  border: none;
 }
-.search-input:focus {
-  outline: none;
-  border-color: var(--primary-accent);
-  box-shadow: 0 0 0 3px var(--focus-ring);
-}
-.note-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
-.note-list-item {
-  padding: 1.25rem 1rem;
-  border-radius: 8px;
+
+button {
   cursor: pointer;
-  border: 1px solid transparent;
-  transition: background-color 0.2s ease;
 }
-.note-list-item:hover { background-color: var(--surface-2); }
-.note-list-item.selected { background-color: #fff; border-color: var(--border-color); }
-.note-list-item h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.note-list-item.selected h3 { color: var(--primary-accent); }
-.note-list-item p { font-size: 0.9rem; color: var(--text-subtle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* --- RIGHT PANE (Note Detail) --- */
-.empty-state-view { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: var(--text-subtle); text-align: center; }
-.empty-state-view p { font-size: 1.1rem; line-height: 1.6; max-width: 30ch; }
-.note-detail-header { padding-bottom: 1.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); }
-.note-detail-header h2 { font-size: 2.5rem; font-weight: 600; line-height: 1.2; }
-.note-detail-actions { display: inline-flex; gap: 0.5rem; background-color: var(--surface-1); border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 8px; float: right; margin-left: 1rem; }
-.note-detail-actions button { background: none; border: none; cursor: pointer; font-family: inherit; font-size: 0.9rem; color: var(--text-subtle); padding: 0.25rem 0.75rem; border-radius: 6px; transition: all 0.2s ease; }
-.note-detail-actions button:hover { background-color: var(--surface-2); color: var(--text-main); }
-.note-detail-actions button:last-child:hover { background-color: var(--destructive-accent); color: white; }
-.note-detail-meta { font-size: 0.9rem; color: var(--text-subtle); margin-bottom: 2.5rem; display: block; clear: both; }
-.note-detail-content { font-size: 1.1rem; line-height: 1.9; color: var(--text-main); }
-.note-detail-content p { margin-bottom: 1.25em; }
-
-/* --- NOTE CARD (Calendar View) --- */
-.note-card-grid { display: grid; gap: 2rem; }
-.note-card-display { background: transparent; }
-.note-card-header { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.5rem; }
-.note-card-header h3 { font-size: 1.5rem; font-weight: 600; }
-.note-card-actions { transform: translateY(-2px); }
-.note-card-actions button { background-color: var(--surface-1); border: 1px solid var(--border-color); padding: 1px 6px; border-radius: 4px; font-size: 0.8rem; color: var(--text-subtle); cursor: pointer; margin-right: 0.25rem; }
-.note-card-actions button:hover { background-color: var(--surface-2); color: var(--text-main); }
-.note-card-content p { line-height: 1.6; color: var(--text-main); }
-.note-card-footer { margin-top: 0.75rem; font-size: 0.9rem; color: var(--text-subtle); }
-
-/* --- TASKBAR --- */
-.taskbar {
-  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); display: flex;
-  background-color: var(--surface-2); padding: 0.5rem; border-radius: 12px;
-  box-shadow: 0 8px 25px var(--shadow); border: 1px solid var(--border-color); z-index: 50;
-  gap: 0.5rem; align-items: center;
+ul {
+  list-style: none;
 }
-.taskbar-logo {
-  width: 36px; height: 36px; border-radius: 50%; background-color: var(--text-main);
-  color: var(--background); display: flex; align-items: center; justify-content: center;
-  font-weight: 600; font-size: 1.1rem; margin-right: 0.5rem;
-}
-.taskbar-navigation { display: flex; }
-.taskbar-actions { margin-left: auto; }
-.taskbar-button {
-  background: none; border: none; color: var(--text-subtle); font-family: inherit;
-  font-size: 0.9rem; cursor: pointer; padding: 0.6rem 1.2rem; border-radius: 8px;
-  transition: all 0.2s ease-in-out; text-decoration: none; font-weight: 500;
-}
-.taskbar-button:hover { color: var(--text-main); }
-.taskbar-button.active { color: var(--text-main); background-color: #fff; }
-.taskbar-button.primary-action { background-color: var(--primary-accent); color: white; }
-.taskbar-button.primary-action:hover { background-color: #356a6d; }
 
-/* --- CALENDAR --- */
-.react-calendar { width: 100% !important; border: none !important; background: none !important; font-family: inherit !important; }
-.react-calendar__navigation__label { font-weight: 400 !important; font-size: 1.25rem; color: var(--text-main) }
-.react-calendar__navigation button { color: var(--text-main) !important; font-weight: 600; }
-.react-calendar__month-view__weekdays__weekday abbr { text-decoration: none !important; font-weight: 600; color: var(--text-subtle); }
-.react-calendar__tile { border-radius: 4px !important; color: var(--text-main) !important; }
-.react-calendar__tile:disabled { color: var(--border-color) !important; }
-.react-calendar__tile--now { background: none !important; font-weight: 900 !important; }
-.react-calendar__tile--active { background: var(--primary-accent) !important; color: white !important; }
-.weekend-day { color: var(--destructive-accent) !important; }
-.day-with-notes { font-weight: 900; }
+/* --- LAYOUT --- */
+.main-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  height: 100%;
+  padding: 1.5rem;
+  gap: 1.5rem;
+}
 
-/* --- NEW CALENDAR LAYOUT --- */
-.calendar-layout {
-  height: 100vh;
+.left-pane {
   display: flex;
   flex-direction: column;
-  padding: 2rem;
-  padding-bottom: 120px;
+  gap: 1.5rem;
   overflow-y: auto;
+  height: 100%;
 }
 
-/* Calendar in left pane */
-.left-pane .calendar-grid {
-  flex: 1;
+.right-pane {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
   background-color: var(--surface-1);
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  overflow: hidden;
-  margin-top: 1rem;
+  padding: 1.5rem;
+  border-radius: var(--radius);
 }
 
-.left-pane .calendar-navigation {
+/* --- LEFT PANE COMPONENTS --- */
+.pane-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0.5rem;
+}
+
+.pane-header h1 {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.left-pane .calendar-navigation button {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  color: var(--text-subtle);
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.left-pane .calendar-navigation button:hover {
-  background-color: var(--surface-2);
-  color: var(--text-main);
-}
-
-.left-pane .calendar-navigation h1 {
+  gap: 0.75rem;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-main);
 }
 
-.left-pane .today-button {
-  background-color: var(--primary-accent);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 0.8rem;
-  cursor: pointer;
+.icon-button {
+  color: var(--text-subtle);
+  padding: 0.5rem;
+  border-radius: var(--radius);
   transition: all 0.2s ease;
 }
 
-.left-pane .today-button:hover {
-  background-color: #356a6d;
-}
-
-.calendar-weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+.icon-button:hover {
+  color: var(--text-main);
   background-color: var(--surface-2);
-  border-bottom: 1px solid var(--border-color);
 }
 
-.calendar-weekday {
-  padding: 0.75rem;
-  text-align: center;
-  font-weight: 600;
-  color: var(--text-subtle);
-  font-size: 0.8rem;
-}
-
-.calendar-days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  flex: 1;
-}
-
-.calendar-day {
-  min-height: 80px;
-  border-right: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
-  padding: 0.25rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+.search-container {
   position: relative;
 }
 
-.calendar-day:hover {
+.search-input {
+  width: 100%;
   background-color: var(--surface-2);
-}
-
-.calendar-day.other-month {
-  background-color: var(--background);
-  color: var(--text-subtle);
-}
-
-.calendar-day.today {
-  background-color: rgba(69, 133, 136, 0.1);
-  font-weight: 600;
-}
-
-.calendar-day.selected-date {
-  background-color: var(--primary-accent);
-  color: white;
-}
-
-.calendar-day.selected-date .calendar-day-number {
-  color: white;
-}
-
-.calendar-day.today .calendar-day-number {
-  background-color: var(--primary-accent);
-  color: white;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-}
-
-.calendar-day-number {
-  font-size: 0.8rem;
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-}
-
-.calendar-day-notes {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.calendar-note-preview {
-  background-color: white;
   border: 1px solid var(--border-color);
-  border-radius: 3px;
-  padding: 0.15rem 0.3rem;
-  font-size: 0.6rem;
-  cursor: pointer;
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
   transition: all 0.2s ease;
 }
 
-.calendar-note-preview:hover {
-  background-color: var(--surface-2);
-  border-color: var(--primary-accent);
-}
-
-.note-preview-title {
-  font-weight: 600;
-  color: var(--text-main);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.calendar-note-more {
-  font-size: 0.6rem;
-  color: var(--text-subtle);
-  text-align: center;
-  padding: 0.15rem;
-}
-
-/* Right pane - Notes for selected date */
-.notes-for-date {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.note-card {
-  background-color: var(--surface-1);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 1.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.note-card:hover {
-  background-color: var(--surface-2);
-  border-color: var(--primary-accent);
-}
-
-.note-card.selected {
-  background-color: white;
-  border-color: var(--primary-accent);
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
-.note-card-header {
+.search-icon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-subtle);
+}
+
+.tags-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background-color: var(--surface-2);
+  padding: 1rem;
+  border-radius: var(--radius);
+}
+
+.tags-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-subtle);
 }
 
-.note-card-header h3 {
-  font-size: 1.25rem;
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filters-container {
+  position: relative;
+}
+
+.sort-select {
+  width: 100%;
+  appearance: none;
+  background-color: var(--surface-2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  padding-right: 2.5rem; /* Space for arrow */
+}
+
+.sort-select-icon {
+  position: absolute;
+  right: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-subtle);
+  pointer-events: none;
+}
+
+/* --- Note List --- */
+.note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.note-list-item {
+  padding: 1rem;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.note-list-item:hover {
+  background-color: var(--surface-2);
+}
+
+.note-list-item.selected {
+  background-color: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.note-list-item-title {
   font-weight: 600;
-  color: var(--text-main);
-  margin: 0;
+  margin-bottom: 0.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.note-card-actions {
+.note-list-item-date {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  margin-bottom: 0.5rem;
+}
+
+.note-list-item.selected .note-list-item-date {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.note-list-item-preview {
+  font-size: 0.875rem;
+  color: var(--text-subtle);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.note-list-item.selected .note-list-item-preview {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.note-list-item-tags {
   display: flex;
   gap: 0.5rem;
 }
 
-.note-card-actions button {
-  background: none;
-  border: none;
-  font-size: 0.8rem;
+.pin-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
   color: var(--text-subtle);
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
 }
 
-.note-card-actions button:hover {
-  background-color: var(--surface-2);
+.pin-button:hover {
   color: var(--text-main);
 }
 
-.note-card-actions button:last-child:hover {
-  background-color: var(--destructive-accent);
-  color: white;
+.pin-button.pinned {
+  color: var(--primary);
+}
+
+.note-list-item.selected .pin-button.pinned {
+  color: #fff;
+}
+
+/* --- RIGHT PANE / NOTE CARD --- */
+.note-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+}
+
+.note-card-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .note-card-content {
-  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  flex-grow: 1;
 }
 
-.note-card-content p {
-  line-height: 1.6;
-  color: var(--text-main);
-  margin-bottom: 0.5rem;
+.note-title-input, .note-content-input {
+  width: 100%;
+  background-color: transparent;
+  border: none;
 }
 
-.note-preview-more {
-  color: var(--text-subtle);
-  font-style: italic;
+.note-title-input {
+  font-size: 2rem;
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.note-content-input {
+  flex-grow: 1;
+  font-size: 1rem;
+  line-height: 1.7;
+  resize: none;
+}
+
+.note-title-input:focus, .note-content-input:focus {
+  outline: none;
 }
 
 .note-card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.save-button {
+  background-color: var(--primary);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.save-button:hover {
+  background-color: var(--primary-hover);
+}
+
+/* --- TAGS --- */
+.tag-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background-color: var(--surface-3);
+  color: var(--text-subtle);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tag-pill:hover {
+  background-color: var(--surface-2);
+  color: var(--text-main);
+}
+
+.tag-pill.selected {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.tag-pill-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.note-list-item.selected .tag-pill {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.note-list-item.selected .tag-pill:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* --- Tag Selector --- */
+.tag-selector-container {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.add-tag-input {
+  background-color: var(--surface-2);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  width: 120px;
+}
+
+/* --- NOTE DISPLAY --- */
+.note-display-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.note-display-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.note-display-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.note-display-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.note-display-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.note-display-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.note-display-content {
+  line-height: 1.7;
+}
+
+.note-display-content > * + * {
+  margin-top: 1em;
+}
+
+.note-display-content h1, .note-display-content h2, .note-display-content h3 {
+  margin-bottom: 0.5em;
+  font-weight: 600;
+}
+.note-display-content p {
+  margin: 0;
+}
+
+/* --- MODAL & FORMS --- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+}
+.modal-content {
+  background-color: var(--surface-1);
+  border-radius: var(--radius);
+  padding: 1.5rem 2rem;
+  border: 1px solid var(--border-color);
+  width: 100%;
+  max-width: 650px;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.modal-close-button:hover {
+  background-color: var(--surface-2);
+}
+.note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-subtle);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.form-group input, .form-group textarea {
+  width: 100%;
+  background-color: var(--surface-2);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  transition: all 0.2s ease;
+}
+.form-group input:focus, .form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+.form-button {
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.form-button.primary {
+  background-color: var(--primary);
+  color: #fff;
+}
+.form-button.primary:hover {
+  background-color: var(--primary-hover);
+}
+.form-button.secondary {
+  background-color: var(--surface-3);
+}
+.form-button.secondary:hover {
+  background-color: var(--surface-2);
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.editor-toolbar > button {
+  flex-shrink: 0;
+}
+
+.editor-toolbar > .divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-color);
+  margin: 0 0.5rem;
+}
+
+.color-input {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  padding: 0;
+}
+.color-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.color-input::-webkit-color-swatch {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.prose-mirror-editor {
+  flex-grow: 1;
+  padding: 1rem 2rem;
+  overflow-y: auto;
+}
+
+.prose-mirror-editor > * + * {
+  margin-top: 0.75em;
+}
+
+.prose-mirror-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--text-subtle);
+  pointer-events: none;
+  height: 0;
+}
+
+.editor-wrapper {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-footer {
+  padding: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.new-entry-container {
+  background-color: var(--surface-2);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.new-entry-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--surface-3);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.new-entry-button:hover {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.template-list-header {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  margin-bottom: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+.template-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius);
+  transition: background-color 0.2s ease;
+}
+
+.template-item:hover {
+  background-color: var(--surface-3);
+}
+
+/* --- ENHANCED JOURNAL EDITOR STYLES --- */
+.journal-editor-wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-1);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.journal-editor-header {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.editor-toolbar-container {
+  flex: 1;
+  overflow-x: auto;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 6px;
+  background: var(--surface-1);
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border-color);
+  margin: 0 0.25rem;
+}
+
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-subtle);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.toolbar-button:hover {
+  background: var(--surface-3);
+  color: var(--text-main);
+}
+
+.toolbar-button.is-active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.journal-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.editor-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.8rem;
   color: var(--text-subtle);
 }
 
-.note-card-tags {
+.last-saved {
   display: flex;
+  align-items: center;
   gap: 0.25rem;
-  flex-wrap: wrap;
+  color: var(--primary);
 }
 
-.note-card-tags .tag-pill {
-  font-size: 0.7rem;
-  padding: 0.1rem 0.4rem;
+.unsaved-indicator {
+  color: var(--destructive);
+  font-weight: 500;
 }
 
-.note-card-time {
-  font-size: 0.75rem;
-}
-
-/* Selected note detail */
-.selected-note-detail {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border-color);
-}
-
-.selected-note-detail .note-detail-header {
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.selected-note-detail .note-detail-header h3 {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.selected-note-detail .note-detail-content {
-  font-size: 1rem;
-  line-height: 1.7;
-}
-
-/* Responsive adjustments for calendar */
-@media (max-width: 1200px) {
-  .calendar-controls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-  }
-  
-  .calendar-controls .search-bar {
-    max-width: none;
-  }
-  
-  .calendar-note-detail {
-    position: static;
-    width: 100%;
-    margin-top: 2rem;
-    max-height: none;
-  }
-}
-
-@media (max-width: 768px) {
-  .calendar-layout {
-    padding: 1rem;
-  }
-  
-  .calendar-day {
-    min-height: 60px;
-    padding: 0.15rem;
-  }
-  
-  .calendar-day-number {
-    font-size: 0.7rem;
-  }
-  
-  .calendar-note-preview {
-    padding: 0.1rem 0.2rem;
-    font-size: 0.5rem;
-  }
-}
-
-/* --- MODAL DIALOG --- */
-.modal-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(60, 56, 54, 0.7);
-  display: flex; justify-content: center; align-items: flex-start;
-  padding-top: 15vh; z-index: 100;
-}
-.modal-content {
-  background-color: var(--background); padding: 2.5rem; border-radius: 12px;
-  width: 90%; max-width: 600px; border: 1px solid var(--border-color);
-  box-shadow: 0 10px 35px rgba(0,0,0,0.15);
-}
-.modal-content h2 { font-size: 1.75rem; margin-bottom: 2rem; font-weight: 600; }
-.note-form { display: flex; flex-direction: column; gap: 1.5rem; }
-.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-.form-group label { font-size: 0.9rem; color: var(--text-subtle); font-weight: 500; }
-.form-group input, .form-group textarea {
-  font-family: inherit; font-size: 1rem; padding: 0.85rem;
-  background-color: var(--surface-1); border: 1px solid var(--border-color);
-  border-radius: 8px; color: var(--text-main); text-transform: lowercase;
-  transition: all 0.2s ease-in-out;
-}
-.form-group input:focus, .form-group textarea:focus {
-  outline: none; background-color: #fff; border-color: var(--primary-accent);
-  box-shadow: 0 0 0 3px var(--focus-ring);
-}
-.form-group textarea { min-height: 150px; line-height: 1.6; }
-.form-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem; }
-.form-button {
-  font-family: inherit; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 8px;
-  cursor: pointer; text-transform: lowercase; border: 1px solid transparent;
-  font-weight: 600; transition: all 0.2s ease;
-}
-.form-button.primary { background-color: var(--primary-accent); color: white; }
-.form-button.primary:hover { background-color: #356a6d; }
-.form-button.secondary { background-color: var(--surface-2); color: var(--text-main); border-color: var(--border-color); }
-.form-button.secondary:hover { background-color: var(--border-color); }
-
-
-/* --- NEW: TAGS & FILTERING --- */
-.tag-filter-container {
-  padding: 0 0.5rem 1.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border-color);
+.action-buttons {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
 }
-.tag-filter-all {
-  background: none; border: 1px solid var(--border-color);
-  padding: 0.25rem 0.75rem; border-radius: 999px;
-  font-family: inherit; font-size: 0.9rem; cursor: pointer;
-  color: var(--text-subtle);
-}
-.tag-filter-all.active {
-  background-color: var(--text-main);
-  color: var(--background);
-  border-color: var(--text-main);
-}
-.tag-pill {
-  border-width: 1px;
-  border-style: solid;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-family: inherit;
-  font-size: 0.9rem;
+
+.editor-action-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: var(--surface-3);
+  color: var(--text-main);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.tag-pill:hover {
-  transform: translateY(-1px);
+
+.editor-action-button:hover {
+  background: var(--surface-2);
 }
-.note-detail-tags {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-.note-detail-tags .tag-pill { /* Remove click interaction for display-only tags */
-  pointer-events: none;
-  background-color: var(--tag-color, var(--primary-accent));
+
+.editor-action-button.primary {
+  background: var(--primary);
   color: #fff;
 }
 
-
-/* --- NEW: TAG SELECTOR (in Modal) --- */
-.tag-selector { position: relative; }
-.tag-pills-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  border: 1px solid var(--border-color);
-  background-color: var(--surface-1);
-  border-radius: 8px;
-  margin-bottom: 0.75rem;
+.editor-action-button.primary:hover {
+  background: var(--primary-hover);
 }
-.tag-pill-option {
-  --tag-color: var(--primary-accent); /* Default color */
-  border: 1px solid var(--tag-color);
-  color: var(--tag-color);
-  background-color: transparent;
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
-  font-family: inherit; font-size: 0.9rem; cursor: pointer;
+
+.editor-action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.journal-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.journal-title-section {
+  padding: 1.5rem 2rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--surface-1);
+}
+
+.journal-title-input {
+  width: 100%;
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+  padding: 0;
+}
+
+.journal-title-input:focus {
+  outline: none;
+}
+
+.journal-title-input::placeholder {
+  color: var(--text-subtle);
+}
+
+.last-modified {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+}
+
+.editor-content-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-content-container .prose-mirror-editor {
+  flex: 1;
+  padding: 1.5rem 2rem;
+  overflow-y: auto;
+  background: var(--surface-1);
+}
+
+.editor-content-container .prose-mirror-editor:focus {
+  outline: none;
+}
+
+/* Enhanced editor content styling */
+.prose-mirror-editor h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem;
+  color: var(--text-main);
+}
+
+.prose-mirror-editor h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem;
+  color: var(--text-main);
+}
+
+.prose-mirror-editor h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+  color: var(--text-main);
+}
+
+.prose-mirror-editor p {
+  margin: 0.75rem 0;
+  line-height: 1.6;
+  color: var(--text-main);
+}
+
+.prose-mirror-editor ul, .prose-mirror-editor ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.prose-mirror-editor li {
+  margin: 0.25rem 0;
+  line-height: 1.6;
+}
+
+.prose-mirror-editor blockquote {
+  border-left: 4px solid var(--primary);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: var(--text-subtle);
+}
+
+.prose-mirror-editor code {
+  background: var(--surface-2);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+}
+
+.prose-mirror-editor pre {
+  background: var(--surface-2);
+  padding: 1rem;
+  border-radius: var(--radius);
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.prose-mirror-editor pre code {
+  background: none;
+  padding: 0;
+}
+
+.prose-mirror-editor hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1.5rem 0;
+}
+
+.prose-mirror-editor mark {
+  background: var(--primary);
+  color: #fff;
+  padding: 0.1rem 0.2rem;
+  border-radius: 2px;
+}
+
+.new-entry-container {
+  background-color: var(--surface-2);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.new-entry-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--surface-3);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-weight: 600;
   transition: all 0.2s ease;
 }
-.tag-pill-option.selected {
-  background-color: var(--tag-color);
+
+.new-entry-button:hover {
+  background-color: var(--primary);
   color: #fff;
 }
-.new-tag-form {
-  display: flex;
-  gap: 0.5rem;
-}
-.new-tag-form input {
-  flex-grow: 1;
-  font-family: inherit; font-size: 1rem; padding: 0.5rem 0.75rem;
-  background-color: transparent; border: 1px solid var(--border-color);
-  border-radius: 6px;
-}
-.new-tag-form button {
-  font-family: inherit; font-size: 0.9rem; padding: 0 1rem;
-  border-radius: 6px; cursor: pointer; border: 1px solid var(--border-color);
-  background-color: var(--surface-2);
-}
-.color-picker-toggle {
-  width: 38px;
-  height: 38px;
-  border-radius: 6px;
-  padding: 0;
-  flex-shrink: 0;
-}
-.color-picker-popover {
-  position: absolute;
-  z-index: 2;
-  right: 0;
-  margin-top: 0.5rem;
+
+.template-list-header {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  margin-bottom: 0.5rem;
+  padding: 0 0.5rem;
 }
 
-.loading-state {
-  text-align: center;
-  padding: 2rem;
+.template-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius);
+  transition: background-color 0.2s ease;
+}
+
+.template-item:hover {
+  background-color: var(--surface-3);
+}
+
+.theme-toggle {
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-toggle:hover {
+  background: var(--surface-2);
+  transform: translateY(-1px);
+}
+
+/* Responsive design for taskbar */
+@media (max-width: 768px) {
+  .taskbar {
+    min-width: 280px;
+    padding: 0.5rem 0.75rem;
+    gap: 0.75rem;
+  }
+  
+  .taskbar-button span {
+    display: none;
+  }
+  
+  .taskbar-button {
+    padding: 0.5rem;
+    min-width: 40px;
+    justify-content: center;
+  }
+  
+  .taskbar-actions {
+    padding-left: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .taskbar {
+    min-width: 240px;
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  .taskbar-navigation {
+    gap: 0.25rem;
+  }
+  
+  .taskbar-actions {
+    gap: 0.25rem;
+    padding-left: 0.5rem;
+  }
+}
+
+/* --- JOURNAL PAGE SPECIFIC STYLES --- */
+.journal-page-pane {
+  padding: 0;
+  overflow: hidden;
+}
+
+.editor-container {
+  height: 100%;
+  width: 100%;
+}
+
+.empty-state-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
   color: var(--text-subtle);
+  text-align: center;
+  gap: 1rem;
+}
+
+.empty-state-view svg {
+  opacity: 0.5;
+}
+
+.empty-state-view p {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Enhanced journal list styling */
+.note-list .note-list-item {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: var(--radius);
+  margin-bottom: 0.5rem;
+  padding: 1rem;
+  background: var(--surface-2);
+  border: 1px solid transparent;
+}
+
+.note-list .note-list-item:hover {
+  background: var(--surface-3);
+  border-color: var(--border-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.note-list .note-list-item.selected {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(233, 109, 36, 0.3);
+}
+
+.note-list .note-list-item.selected .note-list-item-date {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Journal entry preview styling */
+.note-list-item-preview {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  margin-top: 0.5rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.note-list-item.selected .note-list-item-preview {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* --- AGENDA / NEW CALENDAR STYLES --- */
+.agenda-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.5rem;
+  gap: 1.5rem;
+}
+
+.agenda-left-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+}
+
+.agenda-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.5rem;
+}
+
+.agenda-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.agenda-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--surface-1);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+}
+
+.current-month-label {
+  font-weight: 500;
+  width: 120px;
+  text-align: center;
+}
+
+.timeline-scroller-container {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.5rem;
+  margin: -0.5rem; /* Counteract padding for scrollbar */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.timeline-scroller-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
+}
+
+.timeline-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid transparent;
+  width: 64px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.timeline-day:hover {
+  background: var(--surface-2);
+}
+
+.timeline-day.today {
+  border-color: var(--surface-3);
+}
+
+.timeline-day.selected {
+  background: var(--primary);
+  color: white;
+  transform: scale(1.05);
+}
+
+.timeline-day-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-subtle);
+  text-transform: uppercase;
+}
+
+.timeline-day.selected .timeline-day-name {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.timeline-day-number {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.timeline-note-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background: var(--primary);
+    border-radius: 50%;
+}
+
+.timeline-day.selected .timeline-note-indicator {
+    background: white;
+}
+
+.agenda-view-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Remove all old calendar styles */
+.calendar-page-layout,
+.calendar-container,
+.calendar-header,
+.calendar-navigation,
+.calendar-title,
+.calendar-controls,
+.view-mode-toggle,
+.view-mode-button,
+.today-button,
+.calendar-grid-container,
+.calendar-weekdays,
+.weekday-header,
+.calendar-grid,
+.calendar-day,
+.day-header,
+.day-number,
+.note-indicator,
+.note-count,
+.day-notes-preview,
+.note-preview-item,
+.note-preview-dot,
+.note-preview-title,
+.note-preview-more,
+.selected-date-header,
+.today-badge,
+.quick-add-button,
+.quick-add-modal,
+.quick-add-content,
+.quick-add-input,
+.notes-for-day-container,
+.notes-header,
+.notes-count,
+.notes-for-day-list {
+  display: none;
 }

@@ -1,0 +1,158 @@
+'use client';
+import { useState, useMemo, useEffect } from 'react';
+import { useNotes, Note } from '@/context/NotesContext';
+import JournalEditor from '@/components/JournalEditor';
+import { PlusCircle, FileText, Search, Tag, Filter, ChevronsUpDown } from 'lucide-react';
+import TagPill from '@/components/TagPill';
+import JournalTemplateSelector from '@/components/JournalTemplateSelector';
+import { motion, AnimatePresence } from 'framer-motion';
+
+type SortOption =
+  | 'newest-first'
+  | 'oldest-first'
+  | 'title-a-z'
+  | 'title-z-a';
+
+export default function JournalPage() {
+  const { notes, tags, addNote, updateNote } = useNotes();
+  const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOption>('newest-first');
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+
+  const journalNotes = useMemo(() => {
+    const sorted = notes
+      .filter(n => n.isJournal)
+      .sort((a, b) => {
+        switch (sortOrder) {
+            case 'newest-first':
+              return new Date(b.date).getTime() - new Date(a.date).getTime();
+            case 'oldest-first':
+              return new Date(a.date).getTime() - new Date(b.date).getTime();
+            case 'title-a-z':
+              return a.title.localeCompare(b.title);
+            case 'title-z-a':
+              return b.title.localeCompare(a.title);
+            default:
+              return 0;
+        }
+      });
+    
+    let filtered = sorted;
+    if (selectedTagId) {
+        filtered = filtered.filter(note => note.tagIds.includes(selectedTagId));
+    }
+    if (searchTerm) {
+        filtered = filtered.filter(note => 
+            note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (note.content && note.content.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+    }
+    return filtered;
+  }, [notes, searchTerm, selectedTagId, sortOrder]);
+
+  useEffect(() => {
+    if (!selectedEntryId && journalNotes.length > 0) {
+        setSelectedEntryId(journalNotes[0].id);
+    }
+  }, [journalNotes, selectedEntryId]);
+  
+  const selectedEntry = journalNotes.find(entry => entry.id === selectedEntryId);
+
+  const handleCreateFromTemplate = (template: { title: string; content: string; }) => {
+    const newEntryData = {
+        title: `${template.title} - ${new Date().toLocaleDateString()}`,
+        content: template.content,
+        tagIds: [],
+        isJournal: true,
+    };
+    addNote(newEntryData).then(createdNote => {
+        if(createdNote) setSelectedEntryId(createdNote.id);
+    });
+    setShowTemplateSelector(false);
+  };
+
+  const handleTagClick = (tagId: number) => {
+    setSelectedTagId(prev => (prev === tagId ? null : tagId));
+  };
+
+  const handleSaveEntry = (data: { title: string; content: string }) => {
+    if (selectedEntry) {
+      updateNote({ ...selectedEntry, ...data });
+    }
+  };
+
+  return (
+    <div className="main-layout">
+       <div className="left-pane">
+        <div className="pane-header">
+          <h1>Journal Entries</h1>
+        </div>
+
+        <JournalTemplateSelector onSelect={handleCreateFromTemplate} />
+
+        <div className="search-container">
+            <Search className="search-icon" size={16} />
+            <input type="text" placeholder="Search entries..." className="search-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+        </div>
+        {tags.length > 0 && (
+        <div className="tags-container">
+            <div className="tags-header"><span><Tag size={14} /> Filter by tags</span><Filter size={14} /></div>
+            <div className="tags-list">{tags.map(tag => (<TagPill key={tag.id} tag={tag} isSelected={selectedTagId === tag.id} onClick={() => handleTagClick(tag.id)}/>))}</div>
+        </div>
+        )}
+        <div className="filters-container">
+            <select
+              value={sortOrder}
+              onChange={e => setSortOrder(e.target.value as SortOption)}
+              className="sort-select"
+            >
+              <option value="newest-first">Newest first</option>
+              <option value="oldest-first">Oldest first</option>
+              <option value="title-a-z">Title A-Z</option>
+              <option value="title-z-a">Title Z-A</option>
+            </select>
+            <ChevronsUpDown
+              className="sort-select-icon"
+              size={16}
+            />
+        </div>
+        <ul className="note-list">
+          {journalNotes.map(entry => (
+            <li 
+              key={entry.id} 
+              className={`note-list-item ${selectedEntryId === entry.id ? 'selected' : ''}`}
+              onClick={() => setSelectedEntryId(entry.id)}
+            >
+              <div className="note-list-item-title">{entry.title}</div>
+              <p className="note-list-item-date">{new Date(entry.date).toLocaleDateString()}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="right-pane journal-page-pane">
+        {selectedEntry ? (
+          <motion.div
+            key={selectedEntry.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="editor-container"
+          >
+            <JournalEditor
+                initialTitle={selectedEntry.title}
+                initialContent={selectedEntry.content}
+                onSave={handleSaveEntry}
+                lastModified={new Date(selectedEntry.date)}
+            />
+          </motion.div>
+        ) : (
+          <div className="empty-state-view">
+             <FileText size={48} />
+            <p>Select a journal entry or create a new one.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+} 
