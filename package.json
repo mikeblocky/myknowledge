@@ -15,6 +15,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@tiptap/extension-blockquote": "^2.22.3",
     "@tiptap/extension-code-block": "^2.22.3",
+    "@tiptap/extension-color": "^2.22.3",
     "@tiptap/extension-highlight": "^2.22.3",
     "@tiptap/extension-horizontal-rule": "^2.22.3",
     "@tiptap/extension-subscript": "^2.22.3",
