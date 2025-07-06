@@ -54,6 +54,8 @@ export interface NotesContextType {
   addJournalEntry: (entryData: { title: string; content: string; tagIds: string[] }) => void;
   updateJournalEntry: (updatedEntry: JournalEntry) => void;
   addTag: (label: string, color: string) => Promise<Tag>;
+  deleteTag: (id: string) => Promise<void>;
+  updateTag: (id: string, data: { name?: string; color?: string }) => Promise<Tag>;
 }
 
 const NotesContext = createContext<NotesContextType | undefined>(undefined);
@@ -98,7 +100,6 @@ const deleteNote = async (id: string) => {
   setNotes(prev => prev.filter(n => n._id !== id));
 };
 
-
   const togglePinNote = (id: string) => {
     setNotes(prevNotes => {
       const note = prevNotes.find(n => n._id === id);
@@ -137,6 +138,31 @@ const deleteNote = async (id: string) => {
     return newTag;
   };
 
+  const deleteTag = async (id: string) => {
+  await fetch(`http://localhost:4000/tags/${id}`, {
+    method: 'DELETE',
+  });
+  setTags(prev => prev.filter(tag => tag._id !== id));
+
+  setNotes(prevNotes =>
+    prevNotes.map(note => ({
+      ...note,
+      tagIds: note.tagIds.filter(tid => tid !== id),
+    }))
+  );
+};
+
+  const updateTag = async (id: string, data: { name?: string; color?: string }) => {
+  const res = await fetch(`http://localhost:4000/tags/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  const updated = await res.json();
+  setTags(prev => prev.map(t => (t._id === updated._id ? updated : t)));
+  return updated;
+};
+
   return (
     <NotesContext.Provider
       value={{
@@ -152,6 +178,8 @@ const deleteNote = async (id: string) => {
         addJournalEntry,
         updateJournalEntry,
         addTag,
+        deleteTag,
+        updateTag,
       }}
     >
       {children}

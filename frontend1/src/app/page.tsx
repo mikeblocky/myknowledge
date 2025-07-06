@@ -11,6 +11,7 @@ import TagPill from '@/components/TagPill';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import CustomSelect from '@/components/CustomSelect';
+import TagManager from '@/components/TagManager';
 
 type SortOption =
   | 'newest-first'
@@ -29,6 +30,7 @@ export default function HomePage() {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [isListView, setIsListView] = useState(true);
+  const [showTagManager, setShowTagManager] = useState(false);
   
   const sortOptions = [
     { value: 'newest-first', label: 'Newest first' },
@@ -102,10 +104,16 @@ export default function HomePage() {
         <div className="left-pane">
           <div className="pane-header">
             <h1><FileText size={20} /> All Notes</h1>
-            <button className="icon-button" onClick={handleAddClick} title="Create new note">
-              <Plus size={20} />
-            </button>
+            <div className="flex gap-2">
+              <button className="icon-button" onClick={handleAddClick} title="Create new note">
+                <Plus size={20} />
+              </button>
+              <button className="icon-button" onClick={() => setShowTagManager(prev => !prev)} title="Manage tags">
+                <Tag size={20} />
+              </button>
+            </div>
           </div>
+          {showTagManager && <TagManager />}
           <div className="search-container">
             <Search className="search-icon" size={16} />
             <input type="text" placeholder="Search notes..." className="search-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
@@ -116,6 +124,7 @@ export default function HomePage() {
               <div className="tags-list">{tags.map(tag => (<TagPill key={tag._id} tag={tag} isSelected={selectedTagId === tag._id} onClick={() => handleTagClick(tag._id)}/>))}</div>
             </div>
           )}
+
           <div className="filters-container">
             <CustomSelect
               options={sortOptions}
@@ -123,6 +132,7 @@ export default function HomePage() {
               onChange={(value) => setSortOrder(value as SortOption)}
             />
           </div>
+
           <ul className="note-list">
             <AnimatePresence>
               {filteredNotes.map(note => (
@@ -136,6 +146,7 @@ export default function HomePage() {
             </AnimatePresence>
           </ul>
         </div>
+
         <div className="right-pane">
           <AnimatePresence mode="wait">
             {selectedNote ? (
