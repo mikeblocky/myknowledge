@@ -75,6 +75,46 @@ app.post('/tags', async (req, res) => {
   res.json(tag);
 });
 
+// Delete tag
+// Delete tag by ID
+app.delete('/tags/:id', async (req, res) => {
+  try {
+    await Tag.findByIdAndDelete(req.params.id);
+
+    // (Optional) Remove tag ID from all related notes
+    await Note.updateMany(
+      { tagIds: req.params.id },
+      { $pull: { tagIds: req.params.id } }
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Update tag by ID
+app.put('/tags/:id', async (req, res) => {
+  try {
+    const { name, color } = req.body;
+    if (name === undefined && color === undefined) {
+      return res.status(400).json({ success: false, message: 'Nothing to update' });
+    }
+    const updated = await Tag.findByIdAndUpdate(
+      req.params.id,
+      { ...(name !== undefined && { name }), ...(color !== undefined && { color }) },
+      { new: true, runValidators: true }
+    );
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Tag not found' });
+    }
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
 const PORT = 4000;
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
