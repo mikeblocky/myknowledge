@@ -92,7 +92,7 @@ export default function JournalPage() {
     <div className="main-layout">
        <div className="left-pane">
         <div className="pane-header">
-          <h1>Journal Entries</h1>
+          <h1>Journal entries</h1>
         </div>
 
         <JournalTemplateSelector onSelect={handleCreateFromTemplate} />
