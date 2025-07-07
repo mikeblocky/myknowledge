@@ -6,7 +6,7 @@ import { NodeViewWrapper } from '@tiptap/react';
 
 export const NoteNodeView = ({ node, editor }: { node: any, editor: any }) => {
   const { notes } = useNotes();
-  const note = notes.find(n => n.id === parseInt(node.attrs.noteId, 10));
+  const note = notes.find(n => n._id === node.attrs.noteId);
 
   if (!note) {
     return (
