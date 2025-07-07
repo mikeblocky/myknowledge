@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useNotes } from '@/context/NotesContext';
 import TagPill from './TagPill'; // Import the TagPill component
 
-<<<<<<< HEAD
 const PRESET_TAGS = [
   { name: 'Work', color: '#4285F4' },
   { name: 'Personal', color: '#F4B400' },
@@ -16,8 +15,6 @@ const COLOR_PALETTE = [
   '#4285F4', '#F4B400', '#DB4437', '#34A853', '#A142F4', '#F44292', '#00B8D9', '#FFAB00', '#FF5630', '#36B37E', '#6554C0', '#FF8B00'
 ];
 
-=======
->>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
 // A simple hash function to get a color from a string
 const stringToColor = (str: string) => {
   let hash = 0;
@@ -33,19 +30,13 @@ const stringToColor = (str: string) => {
 }
 
 interface TagSelectorProps {
-<<<<<<< HEAD
   selectedTagIds: string[];
   onTagChange: (newTagIds: string[]) => void;
-=======
-  selectedTagIds: number[];
-  onTagChange: (newTagIds: number[]) => void;
->>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
 }
 
 export default function TagSelector({ selectedTagIds, onTagChange }: TagSelectorProps) {
   const { tags, addTag } = useNotes();
   const [newTagName, setNewTagName] = useState('');
-<<<<<<< HEAD
   const [newTagColor, setNewTagColor] = useState(COLOR_PALETTE[0]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -55,17 +46,12 @@ export default function TagSelector({ selectedTagIds, onTagChange }: TagSelector
   );
 
   const handleToggleTag = (tagId: string) => {
-=======
-  
-  const handleToggleTag = (tagId: number) => {
->>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
     const newSelection = selectedTagIds.includes(tagId)
       ? selectedTagIds.filter(id => id !== tagId)
       : [...selectedTagIds, tagId];
     onTagChange(newSelection);
   };
 
-<<<<<<< HEAD
   const handleCreateTag = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const trimmedName = newTagName.trim();
@@ -94,23 +80,10 @@ export default function TagSelector({ selectedTagIds, onTagChange }: TagSelector
       const newTag = await addTag(preset.name, preset.color);
       onTagChange([...selectedTagIds, newTag._id]);
     }
-=======
-  const handleCreateTag = () => {
-    const trimmedName = newTagName.trim();
-    if (!trimmedName) return;
-    
-    // Use our hash function to generate a color
-    const newTagColor = stringToColor(trimmedName);
-    const newTag = addTag(trimmedName, newTagColor);
-
-    onTagChange([...selectedTagIds, newTag.id]);
-    setNewTagName('');
->>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
   };
 
   return (
     <div className="tag-selector-container">
-<<<<<<< HEAD
       {/* Preset tags */}
       <div className="preset-tags-row">
         {PRESET_TAGS.map(preset => (
@@ -177,24 +150,6 @@ export default function TagSelector({ selectedTagIds, onTagChange }: TagSelector
             ))}
           </div>
         )}
-=======
-      {tags.map(tag => (
-        <TagPill
-          key={tag.id}
-          tag={tag}
-          isSelected
-          onClick={() => handleToggleTag(tag.id)}
-        />
-      ))}
-      <form onSubmit={handleCreateTag}>
-        <input
-          type="text"
-          value={newTagName}
-          onChange={(e) => setNewTagName(e.target.value)}
-          placeholder="+ Add Tag"
-          className="add-tag-input"
-        />
->>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
       </form>
     </div>
   );
