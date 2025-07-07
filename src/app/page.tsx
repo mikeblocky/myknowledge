@@ -11,7 +11,10 @@ import TagPill from '@/components/TagPill';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import CustomSelect from '@/components/CustomSelect';
+<<<<<<< HEAD
 import TagManager from '@/components/TagManager';
+=======
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
 
 type SortOption =
   | 'newest-first'
@@ -21,16 +24,27 @@ type SortOption =
 
 export default function HomePage() {
   const { notes, tags, addNote, updateNote, togglePinNote } = useNotes();
+<<<<<<< HEAD
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
+=======
+  const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
   const [sortOrder, setSortOrder] = useState<SortOption>('newest-first');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [isListView, setIsListView] = useState(true);
+<<<<<<< HEAD
   const [showTagManager, setShowTagManager] = useState(false);
+=======
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
   
   const sortOptions = [
     { value: 'newest-first', label: 'Newest first' },
@@ -74,6 +88,7 @@ export default function HomePage() {
     return tempNotes;
   }, [sortedNotes, selectedTagId, searchTerm]);
 
+<<<<<<< HEAD
   const selectedNote = useMemo(() => notes.find(note => selectedNoteId !== null && note._id === String(selectedNoteId)), [notes, selectedNoteId]);
 
   useEffect(() => {
@@ -82,16 +97,34 @@ export default function HomePage() {
     }
     if (selectedNote && !filteredNotes.some(n => n._id === selectedNote._id)) {
         setSelectedNoteId(filteredNotes.length > 0 ? filteredNotes[0]._id : null);
+=======
+  const selectedNote = useMemo(() => notes.find(note => note.id === selectedNoteId), [notes, selectedNoteId]);
+
+  useEffect(() => {
+    if (!selectedNote && filteredNotes.length > 0) {
+      setSelectedNoteId(filteredNotes[0].id);
+    }
+    if (selectedNote && !filteredNotes.some(n => n.id === selectedNote.id)) {
+        setSelectedNoteId(filteredNotes.length > 0 ? filteredNotes[0].id : null);
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
     }
   }, [filteredNotes, selectedNote]);
 
   const handleAddClick = () => { setEditingNote(null); setIsModalOpen(true); };
   const handleEditClick = (note: Note) => { setEditingNote(note); setIsModalOpen(true); };
+<<<<<<< HEAD
   const handleTagClick = (tagId: string) => { setSelectedTagId(prev => (prev === tagId ? null : tagId)); };
   
   const handleSaveNote = async (noteData: { title: string; content: string; tagIds: string[] }) => {
     const savedNote = editingNote ? await updateNote({ ...editingNote, ...noteData }) : await addNote(noteData);
     if (savedNote) setSelectedNoteId(savedNote._id);
+=======
+  const handleTagClick = (tagId: number) => { setSelectedTagId(prev => (prev === tagId ? null : tagId)); };
+  
+  const handleSaveNote = async (noteData: { title: string; content: string; tagIds: number[] }) => {
+    const savedNote = editingNote ? await updateNote({ ...editingNote, ...noteData }) : await addNote(noteData);
+    if (savedNote) setSelectedNoteId(savedNote.id);
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
     setIsModalOpen(false);
     setEditingNote(null);
   };
@@ -104,6 +137,7 @@ export default function HomePage() {
         <div className="left-pane">
           <div className="pane-header">
             <h1><FileText size={20} /> All Notes</h1>
+<<<<<<< HEAD
             <div className="flex gap-2">
               <button className="icon-button" onClick={handleAddClick} title="Create new note">
                 <Plus size={20} />
@@ -114,6 +148,12 @@ export default function HomePage() {
             </div>
           </div>
           {showTagManager && <TagManager />}
+=======
+            <button className="icon-button" onClick={handleAddClick} title="Create new note">
+              <Plus size={20} />
+            </button>
+          </div>
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
           <div className="search-container">
             <Search className="search-icon" size={16} />
             <input type="text" placeholder="Search notes..." className="search-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
@@ -121,10 +161,16 @@ export default function HomePage() {
           {tags.length > 0 && (
             <div className="tags-container">
               <div className="tags-header"><span><Tag size={14} /> Filter by tags</span><Filter size={14} /></div>
+<<<<<<< HEAD
               <div className="tags-list">{tags.map(tag => (<TagPill key={tag._id} tag={tag} isSelected={selectedTagId === tag._id} onClick={() => handleTagClick(tag._id)}/>))}</div>
             </div>
           )}
 
+=======
+              <div className="tags-list">{tags.map(tag => (<TagPill key={tag.id} tag={tag} isSelected={selectedTagId === tag.id} onClick={() => handleTagClick(tag.id)}/>))}</div>
+            </div>
+          )}
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
           <div className="filters-container">
             <CustomSelect
               options={sortOptions}
@@ -132,6 +178,7 @@ export default function HomePage() {
               onChange={(value) => setSortOrder(value as SortOption)}
             />
           </div>
+<<<<<<< HEAD
 
           <ul className="note-list">
             <AnimatePresence>
@@ -147,11 +194,23 @@ export default function HomePage() {
           </ul>
         </div>
 
+=======
+          <ul className="note-list">
+            <AnimatePresence>
+              {filteredNotes.map(note => (<NoteListItem key={note.id} note={note} isSelected={selectedNoteId === note.id} onSelect={() => setSelectedNoteId(note.id)} onPinToggle={() => togglePinNote(note.id)}/>))}
+            </AnimatePresence>
+          </ul>
+        </div>
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
         <div className="right-pane">
           <AnimatePresence mode="wait">
             {selectedNote ? (
               <NoteDisplay 
+<<<<<<< HEAD
                 key={selectedNote._id}
+=======
+                key={selectedNote.id}
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
                 note={selectedNote}
                 onEdit={() => handleEditClick(selectedNote)}
               />

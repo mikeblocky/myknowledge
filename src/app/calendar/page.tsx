@@ -23,17 +23,23 @@ import {
 } from 'lucide-react';
 import NoteListItem from '@/components/NoteListItem';
 import { AnimatePresence, motion } from 'framer-motion';
+<<<<<<< HEAD
 import NoteEditor from '@/components/NoteEditor';
 // If NoteEditor exists elsewhere, update the path accordingly, for example:
 // import NoteEditor from '../components/NoteEditor';
 // Or create the file at src/components/NoteEditor.tsx if missing.
+=======
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
 
 export default function CalendarPage() {
   const { notes, togglePinNote, addNote } = useNotes();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [timelineDates, setTimelineDates] = useState<Date[]>([]);
+<<<<<<< HEAD
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+=======
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   const notesByDate = useMemo(() => {
@@ -130,11 +136,19 @@ export default function CalendarPage() {
                     <ul className="note-list">
                         {selectedDayNotes.map(note => (
                             <NoteListItem
+<<<<<<< HEAD
                                 key={note._id}
                                 note={note}
                                 isSelected={selectedNoteId === note._id}
                                 onSelect={() => setSelectedNoteId(note._id)}
                                 onPinToggle={() => togglePinNote(note._id)}
+=======
+                                key={note.id}
+                                note={note}
+                                isSelected={false}
+                                onSelect={() => {}}
+                                onPinToggle={() => togglePinNote(note.id)}
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
                             />
                         ))}
                     </ul>
@@ -151,6 +165,7 @@ export default function CalendarPage() {
                 </motion.div>
             </AnimatePresence>
         </div>
+<<<<<<< HEAD
 
         {selectedNoteId && (
           <NoteEditor
@@ -159,6 +174,8 @@ export default function CalendarPage() {
             // ...other props for editing/deleting...
           />
         )}
+=======
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
       </div>
     </div>
   );

@@ -24,7 +24,11 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onBack, onClose, isMobile }) 
     if (note) {
       setTitle(note.title);
       setContent(note.content);
+<<<<<<< HEAD
       const noteTags = tags.filter(t => note.tagIds.includes(t._id));
+=======
+      const noteTags = tags.filter(t => note.tagIds.includes(t.id));
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
       setSelectedTags(noteTags);
     }
   }, [note, tags]);
@@ -32,14 +36,22 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onBack, onClose, isMobile }) 
   if (!note) return null;
 
   const handleSave = () => {
+<<<<<<< HEAD
     const tagIds = selectedTags.map(tag => tag._id);
+=======
+    const tagIds = selectedTags.map(tag => tag.id);
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
     const updatedNote = { ...note, title, content, tagIds };
     updateNote(updatedNote);
     onClose();
   };
 
   const handleDelete = () => {
+<<<<<<< HEAD
     deleteNote(note._id);
+=======
+    deleteNote(note.id);
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
     onClose();
   }
 
@@ -54,7 +66,11 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onBack, onClose, isMobile }) 
       <div className="note-card-header">
         {isMobile && <button onClick={onBack} className="icon-button"><ArrowLeft size={20}/></button>}
         <button 
+<<<<<<< HEAD
           onClick={() => togglePinNote(note._id)} 
+=======
+          onClick={() => togglePinNote(note.id)} 
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
           className={`icon-button ${note.isPinned ? 'pinned' : ''}`}
           title={note.isPinned ? "Unpin note" : "Pin note"}
         >
@@ -85,9 +101,15 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onBack, onClose, isMobile }) 
       </div>
       <div className="note-card-footer">
           <TagSelector 
+<<<<<<< HEAD
               selectedTagIds={selectedTags.map(t => t._id)}
               onTagChange={(newTagIds) => {
                   const newTags = tags.filter(t => newTagIds.includes(t._id));
+=======
+              selectedTagIds={selectedTags.map(t => t.id)}
+              onTagChange={(newTagIds) => {
+                  const newTags = tags.filter(t => newTagIds.includes(t.id));
+>>>>>>> c1fb7f2977895023cc5098c75439c805d43925fa
                   setSelectedTags(newTags);
               }}
           />
