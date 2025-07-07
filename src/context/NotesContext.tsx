@@ -73,20 +73,21 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     setLoading(true);
     setError(null);
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
     Promise.all([
-      fetch('http://localhost:4000/notes')
+      fetch(`${API_URL}/notes`)
         .then(res => {
           if (!res.ok) throw new Error('Failed to fetch notes');
           return res.json();
         })
         .then(data => setNotes(data)),
-      fetch('http://localhost:4000/tags')
+      fetch(`${API_URL}/tags`)
         .then(res => {
           if (!res.ok) throw new Error('Failed to fetch tags');
           return res.json();
         })
         .then(data => setTags(data)),
-      fetch('http://localhost:4000/journals')
+      fetch(`${API_URL}/journals`)
         .then(res => {
           if (!res.ok) throw new Error('Failed to fetch journals');
           return res.json();
@@ -98,7 +99,8 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
 const addNote = async ({ title, content, tagIds }: Omit<Note, '_id' | 'date' | 'isPinned'>) => {
-  const res = await fetch('http://localhost:4000/notes', {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const res = await fetch(`${API_URL}/notes`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ title, content, tagIds }),
@@ -109,7 +111,8 @@ const addNote = async ({ title, content, tagIds }: Omit<Note, '_id' | 'date' | '
 };
 
   const updateNote = async (note: Note) => {
-  const res = await fetch(`http://localhost:4000/notes/${note._id}`, {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const res = await fetch(`${API_URL}/notes/${note._id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(note),
@@ -120,7 +123,8 @@ const addNote = async ({ title, content, tagIds }: Omit<Note, '_id' | 'date' | '
 };
 
 const deleteNote = async (id: string) => {
-  await fetch(`http://localhost:4000/notes/${id}`, { method: 'DELETE' });
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  await fetch(`${API_URL}/notes/${id}`, { method: 'DELETE' });
   setNotes(prev => prev.filter(n => n._id !== id));
 };
 
@@ -146,7 +150,8 @@ const deleteNote = async (id: string) => {
   // --- Journal Specific ---
   const getJournalEntry = (id: string) => journalEntries.find(e => e._id === id);
   const addJournalEntry = async (entryData: { title: string; content: string; tagIds: string[] }) => {
-    const res = await fetch('http://localhost:4000/journals', {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const res = await fetch(`${API_URL}/journals`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entryData),
@@ -156,7 +161,8 @@ const deleteNote = async (id: string) => {
     return newEntry;
   };
   const updateJournalEntry = async (updatedEntry: JournalEntry) => {
-    const res = await fetch(`http://localhost:4000/journals/${updatedEntry._id}`, {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const res = await fetch(`${API_URL}/journals/${updatedEntry._id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedEntry),
@@ -166,12 +172,14 @@ const deleteNote = async (id: string) => {
     return updated;
   };
   const deleteJournalEntry = async (id: string) => {
-    await fetch(`http://localhost:4000/journals/${id}`, { method: 'DELETE' });
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    await fetch(`${API_URL}/journals/${id}`, { method: 'DELETE' });
     setJournalEntries(prev => prev.filter(e => e._id !== id));
   };
 
   const addTag = async (label: string, color: string) => {
-    const res = await fetch('http://localhost:4000/tags', {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const res = await fetch(`${API_URL}/tags`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: label, color }),
@@ -182,29 +190,31 @@ const deleteNote = async (id: string) => {
   };
 
   const deleteTag = async (id: string) => {
-  await fetch(`http://localhost:4000/tags/${id}`, {
-    method: 'DELETE',
-  });
-  setTags(prev => prev.filter(tag => tag._id !== id));
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    await fetch(`${API_URL}/tags/${id}`, {
+      method: 'DELETE',
+    });
+    setTags(prev => prev.filter(tag => tag._id !== id));
 
-  setNotes(prevNotes =>
-    prevNotes.map(note => ({
-      ...note,
-      tagIds: note.tagIds.filter(tid => tid !== id),
-    }))
-  );
-};
+    setNotes(prevNotes =>
+      prevNotes.map(note => ({
+        ...note,
+        tagIds: note.tagIds.filter(tid => tid !== id),
+      }))
+    );
+  };
 
   const updateTag = async (id: string, data: { name?: string; color?: string }) => {
-  const res = await fetch(`http://localhost:4000/tags/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  const updated = await res.json();
-  setTags(prev => prev.map(t => (t._id === updated._id ? updated : t)));
-  return updated;
-};
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const res = await fetch(`${API_URL}/tags/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const updated = await res.json();
+    setTags(prev => prev.map(t => (t._id === updated._id ? updated : t)));
+    return updated;
+  };
 
   return (
     <NotesContext.Provider
