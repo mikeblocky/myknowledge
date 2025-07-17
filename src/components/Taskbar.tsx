@@ -21,6 +21,7 @@ export default function Taskbar() {
     return (
         <motion.div 
             className="taskbar"
+            style={{ marginTop: '24px' }}
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 100, damping: 15, delay: 0.2 }}
@@ -80,7 +81,7 @@ export default function Taskbar() {
                     </AnimatePresence>
                 </motion.button>
                 
-                {isSignedIn && (
+                {isSignedIn ? (
                     <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -99,6 +100,11 @@ export default function Taskbar() {
                             }}
                         />
                     </motion.div>
+                ) : (
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <Link href="/sign-in" className="taskbar-button">Log In</Link>
+                        <Link href="/sign-up" className="taskbar-button">Sign Up</Link>
+                    </div>
                 )}
             </div>
         </motion.div>

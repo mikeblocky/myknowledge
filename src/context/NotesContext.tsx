@@ -2,6 +2,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useUser, useClerk, useAuth } from '@clerk/nextjs';
 
 // MOCK DATA
 const initialNotes: Note[] = [
@@ -70,63 +71,97 @@ export const NotesProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  useEffect(() => {
+  const { user } = useUser();
+  const { getToken } = useAuth();
+  const userId = user?.id;
+
+  // Helper to get auth headers
+  const getAuthHeaders = async () => {
+    const token = await getToken();
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  };
+
+  // Fetch all data
+  const fetchAllData = async () => {
     setLoading(true);
     setError(null);
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
-    Promise.all([
-      fetch(`${API_URL}/notes`)
-        .then(res => {
-          if (!res.ok) throw new Error('Failed to fetch notes');
-          return res.json();
-        })
-        .then(data => setNotes(data)),
-      fetch(`${API_URL}/tags`)
-        .then(res => {
-          if (!res.ok) throw new Error('Failed to fetch tags');
-          return res.json();
-        })
-        .then(data => setTags(data)),
-      fetch(`${API_URL}/journals`)
-        .then(res => {
-          if (!res.ok) throw new Error('Failed to fetch journals');
-          return res.json();
-        })
-        .then(data => setJournalEntries(data)),
-    ])
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
+    try {
+      const headers = await getAuthHeaders();
+      const [notesRes, tagsRes, journalsRes] = await Promise.all([
+        fetch(`${API_URL}/api/notes`, { headers }),
+        fetch(`${API_URL}/api/tags`, { headers }),
+        fetch(`${API_URL}/api/journals`, { headers }),
+      ]);
+      if (!notesRes.ok) throw new Error('Failed to fetch notes');
+      if (!tagsRes.ok) throw new Error('Failed to fetch tags');
+      if (!journalsRes.ok) throw new Error('Failed to fetch journals');
+      setNotes(await notesRes.json());
+      setTags(await tagsRes.json());
+      setJournalEntries(await journalsRes.json());
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!userId) return;
+    fetchAllData();
+  }, [userId]);
+
+  // Listen for signOut and clear data
+  useEffect(() => {
+    const handleSignOut = () => {
+      setNotes([]);
+      setTags([]);
+      setJournalEntries([]);
+      setError(null);
+      setLoading(false);
+      window.location.reload();
+    };
+    window.addEventListener('clerk:signOut', handleSignOut);
+    return () => {
+      window.removeEventListener('clerk:signOut', handleSignOut);
+    };
   }, []);
 
-const addNote = async ({ title, content, tagIds }: Omit<Note, '_id' | 'date' | 'isPinned'>) => {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  const res = await fetch(`${API_URL}/notes`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, content, tagIds }),
-  });
-  const newNote = await res.json();
-  setNotes(prev => [...prev, newNote]);
-  return newNote;
-};
+  const addNote = async ({ title, content, tagIds }: Omit<Note, '_id' | 'date' | 'isPinned'>) => {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_URL}/api/notes`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ title, content, tagIds }),
+    });
+    const newNote = await res.json();
+    await fetchAllData();
+    return newNote;
+  };
 
   const updateNote = async (note: Note) => {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  const res = await fetch(`${API_URL}/notes/${note._id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(note),
-  });
-  const updated = await res.json();
-  setNotes(prev => prev.map(n => n._id === updated._id ? updated : n));
-  return updated;
-};
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_URL}/api/notes/${note._id}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(note),
+    });
+    const updated = await res.json();
+    await fetchAllData();
+    return updated;
+  };
 
-const deleteNote = async (id: string) => {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  await fetch(`${API_URL}/notes/${id}`, { method: 'DELETE' });
-  setNotes(prev => prev.filter(n => n._id !== id));
-};
+  const deleteNote = async (id: string) => {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const headers = await getAuthHeaders();
+    await fetch(`${API_URL}/api/notes/${id}`, { method: 'DELETE', headers });
+    await fetchAllData();
+  };
 
   const togglePinNote = (id: string) => {
     setNotes(prevNotes => {
@@ -151,68 +186,65 @@ const deleteNote = async (id: string) => {
   const getJournalEntry = (id: string) => journalEntries.find(e => e._id === id);
   const addJournalEntry = async (entryData: { title: string; content: string; tagIds: string[] }) => {
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
-    const res = await fetch(`${API_URL}/journals`, {
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_URL}/api/journals`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(entryData),
     });
     const newEntry = await res.json();
-    setJournalEntries(prev => [...prev, newEntry]);
+    await fetchAllData();
     return newEntry;
   };
   const updateJournalEntry = async (updatedEntry: JournalEntry) => {
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
-    const res = await fetch(`${API_URL}/journals/${updatedEntry._id}`, {
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_URL}/api/journals/${updatedEntry._id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(updatedEntry),
     });
     const updated = await res.json();
-    setJournalEntries(prev => prev.map(e => e._id === updated._id ? updated : e));
+    await fetchAllData();
     return updated;
   };
   const deleteJournalEntry = async (id: string) => {
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
-    await fetch(`${API_URL}/journals/${id}`, { method: 'DELETE' });
-    setJournalEntries(prev => prev.filter(e => e._id !== id));
+    const headers = await getAuthHeaders();
+    await fetch(`${API_URL}/api/journals/${id}`, { method: 'DELETE', headers });
+    await fetchAllData();
   };
 
   const addTag = async (label: string, color: string) => {
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
-    const res = await fetch(`${API_URL}/tags`, {
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_URL}/api/tags`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ name: label, color }),
     });
     const newTag: Tag = await res.json();
-    setTags(prevTags => [...prevTags, newTag]);
+    await fetchAllData();
     return newTag;
   };
 
   const deleteTag = async (id: string) => {
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
-    await fetch(`${API_URL}/tags/${id}`, {
-      method: 'DELETE',
-    });
-    setTags(prev => prev.filter(tag => tag._id !== id));
-
-    setNotes(prevNotes =>
-      prevNotes.map(note => ({
-        ...note,
-        tagIds: note.tagIds.filter(tid => tid !== id),
-      }))
-    );
+    const headers = await getAuthHeaders();
+    await fetch(`${API_URL}/api/tags/${id}`, { method: 'DELETE', headers });
+    await fetchAllData();
   };
 
   const updateTag = async (id: string, data: { name?: string; color?: string }) => {
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
-    const res = await fetch(`${API_URL}/tags/${id}`, {
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_URL}/api/tags/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(data),
     });
     const updated = await res.json();
-    setTags(prev => prev.map(t => (t._id === updated._id ? updated : t)));
+    await fetchAllData();
     return updated;
   };
 
