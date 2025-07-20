@@ -29,17 +29,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <ThemeProvider>
-        <NotesProvider>
-          <html lang="en" className={`${inter.variable} ${roboto_mono.variable}`}>
-            <body className="app-container">
+    <html lang="en" className={`${inter.variable} ${roboto_mono.variable}`}>
+      <body className="app-container">
+        <ClerkProvider>
+          <ThemeProvider>
+            <NotesProvider>
               <Taskbar />
               <main className="main-content">{children}</main>
-            </body>
-          </html>
-        </NotesProvider>
-      </ThemeProvider>
-    </ClerkProvider>
+            </NotesProvider>
+          </ThemeProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

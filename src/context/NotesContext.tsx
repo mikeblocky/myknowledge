@@ -36,6 +36,7 @@ export interface Note {
   content: string;
   date: string;
   isPinned: boolean;
+  isArchived?: boolean;
   tagIds: string[];
   isJournal?: boolean;
 }

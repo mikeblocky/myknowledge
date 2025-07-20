@@ -13,9 +13,10 @@ interface NoteListItemProps {
   isSelected: boolean;
   onSelect: () => void;
   onPinToggle: () => void;
+  onDoubleClick?: () => void;
 }
 
-export default function NoteListItem({ note, isSelected, onSelect, onPinToggle }: NoteListItemProps) {
+export default function NoteListItem({ note, isSelected, onSelect, onPinToggle, onDoubleClick }: NoteListItemProps) {
   const { tags } = useNotes();
   const rawDate = note.date ? new Date(note.date) : null;
   const formattedDate =
@@ -50,6 +51,7 @@ const exampleNote: Note = {
     <motion.li
       className={`note-list-item ${isSelected ? 'selected' : ''}`}
       onClick={onSelect}
+      onDoubleClick={onDoubleClick}
       layout
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -63,7 +65,7 @@ const exampleNote: Note = {
       </button>
       <div className="note-list-item-title">{note.title || 'Untitled Note'}</div>
       <div className="note-list-item-date">{formattedDate}</div>
-      <div className="note-list-item-preview">{note.content.substring(0, 80)}</div>
+      {/* Removed content preview */}
       {noteTags.length > 0 && (
         <div className="note-list-item-tags">
           {noteTags.slice(0, 3).map(tag => (
