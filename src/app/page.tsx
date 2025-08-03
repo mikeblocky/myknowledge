@@ -140,7 +140,7 @@ export default function HomePage() {
             </div>
           </div>
           
-          {showTagManager && <TagManager />}
+          <TagManager open={showTagManager} onClose={() => setShowTagManager(false)} />
           
           <div className="mobile-search-container">
             <Search className="search-icon" size={16} />
@@ -211,7 +211,7 @@ export default function HomePage() {
               </button>
             </div>
           </div>
-          {showTagManager && <TagManager />}
+          <TagManager open={showTagManager} onClose={() => setShowTagManager(false)} />
           <div className="search-container">
             <Search className="search-icon" size={16} />
             <input type="text" placeholder="Search notes..." className="search-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
@@ -259,7 +259,7 @@ export default function HomePage() {
               </button>
             </div>
           </div>
-          {showTagManager && <TagManager />}
+          <TagManager open={showTagManager} onClose={() => setShowTagManager(false)} />
           <div className="search-container">
             <Search className="search-icon" size={16} />
             <input type="text" placeholder="Search notes..." className="search-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />

@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { Inter, Roboto_Mono } from 'next/font/google';
 import './globals.css';
 import Taskbar from '@/components/Taskbar';
+import { Toaster } from 'sonner';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -36,6 +37,7 @@ export default function RootLayout({
             <NotesProvider>
               <Taskbar />
               <main className="main-content">{children}</main>
+              <Toaster position="top-center" richColors />
             </NotesProvider>
           </ThemeProvider>
         </ClerkProvider>
