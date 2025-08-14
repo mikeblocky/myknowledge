@@ -24,56 +24,53 @@ export default function NoteListItem({ note, isSelected, onSelect, onPinToggle, 
 
   const noteTags = tags.filter(tag => note.tagIds.includes(tag._id));
 
-  // Usage example with the suggested code change
-const exampleNote: Note = {
-  _id: '1',
-  title: 'Sample Note',
-  content: 'This is a sample note content.',
-  date: new Date().toISOString(),
-  isPinned: false,
-  tagIds: [],
-};
-
-// In a component
-<NoteListItem 
-  note={exampleNote} 
-  isSelected={true} 
-  onSelect={() => {}} 
-  onPinToggle={() => {}}
-/>
-
   const handlePinClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onPinToggle();
   };
 
   return (
-    <motion.li
-      className={`note-list-item ${isSelected ? 'selected' : ''}`}
+    <motion.div
+      className={`note-card ${isSelected ? 'selected' : ''}`}
       onClick={onSelect}
       onDoubleClick={onDoubleClick}
       layout
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
     >
-      <button 
-        className={`pin-button ${note.isPinned ? 'pinned' : ''}`}
-        onClick={handlePinClick}
-      >
-        <Pin size={16} />
-      </button>
-      <div className="note-list-item-title">{note.title || 'Untitled Note'}</div>
-      <div className="note-list-item-date">{formattedDate}</div>
-      {/* Removed content preview */}
+      <div className="note-card-header">
+        <button 
+          className={`note-card-action-btn pin-btn ${note.isPinned ? 'pinned' : ''}`}
+          onClick={handlePinClick}
+          title={note.isPinned ? 'Unpin note' : 'Pin note'}
+        >
+          <Pin size={16} />
+        </button>
+        <div className="note-card-meta">
+          <span className="note-card-date">
+            <Calendar size={14} />
+            {formattedDate}
+          </span>
+        </div>
+      </div>
+      
+      <div className="note-card-title">{note.title || 'Untitled Note'}</div>
+      
       {noteTags.length > 0 && (
-        <div className="note-list-item-tags">
+        <div className="note-card-tags">
           {noteTags.slice(0, 3).map(tag => (
             <TagPill key={tag._id} tag={tag} />
           ))}
+          {noteTags.length > 3 && (
+            <span className="note-card-tags-more">+{noteTags.length - 3}</span>
+          )}
         </div>
       )}
-    </motion.li>
+    </motion.div>
   );
 }
 
