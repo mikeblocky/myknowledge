@@ -57,7 +57,6 @@
     "@types/tinycolor2": "^1.4.6",
     "autoprefixer": "^10.4.20",
     "cross-env": "^7.0.3",
-    "cssnano": "^7.0.6",
     "tailwindcss": "^4.1.10",
     "typescript": "^5"
   }
