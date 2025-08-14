@@ -13,9 +13,9 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
-  // Experimental features for performance
+  // Experimental features for performance - disabled to avoid build issues
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false, // Disabled to avoid build issues with critters
     optimizePackageImports: ['@tiptap/react', 'lucide-react', 'framer-motion'],
   },
   
@@ -73,6 +73,15 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
+  },
+  
+  // Ensure stable builds
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  
+  eslint: {
+    ignoreDuringBuilds: false,
   },
 };
 
